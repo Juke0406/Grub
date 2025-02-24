@@ -1,0 +1,26 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Build outputs
+dist
+drizzle
+
+# Environment and local files
+.env*
+*.log
+.DS_Store
+
+# Development files
+.git
+.gitignore
+README.md
+.vscode
+*.test.ts
+*.spec.ts
+coverage
+
+# Temporary files
+*.tmp
+*.temp
+.cache

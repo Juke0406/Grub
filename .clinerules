@@ -1,0 +1,24 @@
+SDG 12: Responsible Consumption and Production in Singapore—an AI-Powered Smart Secondhand Exchange Platform.
+
+Solution: AI-Driven Circular Economy Marketplace
+
+A mobile/web app that leverages AI to facilitate secondhand exchanges, making it easier for users to sell, donate, or swap used goods (e.g., furniture, electronics, clothes, books) to reduce waste and promote a circular economy in Singapore.
+
+AI-Powered Item Categorisation & Pricing
+
+Problem:
+
+People hesitate to sell or donate items due to uncertainty about pricing and hassle in listing them.
+
+AI-Powered Solution:
+    •    Users snap a photo of their item, and AI:
+    •    Auto-classifies the item (e.g., “IKEA Chair, Home Furniture”).
+    •    Suggests a fair market price using past transaction data (e.g., “Average resale price: $30 - $50”).
+    •    Generates a product description based on image recognition.
+    •    AI dynamically adjusts pricing based on demand trends.
+    •    Gamification: Users earn eco-points for listing and donating items instead of discarding them.
+
+Tech Feasibility:
+    •    Computer Vision (YOLO/FastAI) for image classification.
+    •    NLP (GPT-based model) for automated descriptions.
+    •    Basic price prediction model (linear regression or decision trees).
