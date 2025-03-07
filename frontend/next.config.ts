@@ -1,12 +1,14 @@
 import type { NextConfig } from "next";
-const withPWA = require("next-pwa")({
-  dest: "public",
-  register: true,
-  skipWaiting: true,
-});
 
 const config: NextConfig = {
-  reactStrictMode: true,
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
+    ],
+  },
 };
 
-export default withPWA(config);
+export default config;

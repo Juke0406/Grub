@@ -71,6 +71,7 @@ const userNavigation = [
     title: "My Reservations",
     url: "/reservations",
     icon: ForkKnife,
+    isActive: true,
     items: [
       {
         title: "Active",
@@ -90,6 +91,7 @@ const userNavigation = [
     title: "Settings",
     url: "/settings",
     icon: Settings2,
+    isActive: true,
     items: [
       {
         title: "Profile",
@@ -128,6 +130,7 @@ const businessNavigation = [
     title: "Analytics",
     url: "/business/analytics",
     icon: BarChart3,
+    isActive: true,
     items: [
       {
         title: "Sales",
@@ -147,6 +150,7 @@ const businessNavigation = [
     title: "Settings",
     url: "/settings",
     icon: Settings2,
+    isActive: true,
     items: [
       {
         title: "Store Profile",

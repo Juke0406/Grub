@@ -4,6 +4,7 @@ import { CategoryFilter } from "@/components/category-filter";
 import { FoodItemCard } from "@/components/food-item-card";
 import { SearchHeader } from "@/components/search-header";
 import { useMobile } from "@/hooks/use-mobile";
+import data from "@/lib/data.json";
 import { Beef, Coffee, Pizza, ShoppingBag, Soup } from "lucide-react";
 import { useState } from "react";
 
@@ -20,86 +21,44 @@ const categories = [
   { id: "meat", name: "Meat", icon: <Beef className="h-4 w-4" /> },
 ];
 
-// Mock data - in real app this would come from an API
-const mockItems = [
-  {
-    id: 1,
-    name: "Mystery Bread Bag",
-    shop: "Happy Bakery",
-    type: "bakery",
-    category: "mystery",
-    originalPrice: 40,
-    discountedPrice: 20,
-    image: "https://images.unsplash.com/photo-1608198093002-ad4e005484ec",
-    distance: 0.8,
-    rating: 4.5,
-    availableUntil: "Today 9pm",
-  },
-  {
-    id: 2,
-    name: "Fresh Produce Bundle",
-    shop: "FreshMart",
-    type: "supermarket",
-    category: "produce",
-    originalPrice: 30,
-    discountedPrice: 15,
-    image: "https://images.unsplash.com/photo-1610348725531-843dff563e2c",
-    distance: 1.2,
-    rating: 4.8,
-    availableUntil: "Today 8pm",
-  },
-  {
-    id: 3,
-    name: "Pastry Box",
-    shop: "Sweet Delights",
-    type: "bakery",
-    category: "pastries",
-    originalPrice: 35,
-    discountedPrice: 17.5,
-    image: "https://images.unsplash.com/photo-1517433670267-08bbd4be890f",
-    distance: 2.1,
-    rating: 4.6,
-    availableUntil: "Today 8:30pm",
-  },
-  {
-    id: 4,
-    name: "Artisan Bread Selection",
-    shop: "Happy Bakery",
-    type: "bakery",
-    category: "bread",
-    originalPrice: 25,
-    discountedPrice: 12.5,
-    image: "https://images.unsplash.com/photo-1509440159596-0249088772ff",
-    distance: 0.8,
-    rating: 4.7,
-    availableUntil: "Today 7pm",
-  },
-  {
-    id: 5,
-    name: "Premium Meat Pack",
-    shop: "FreshMart",
-    type: "supermarket",
-    category: "meat",
-    originalPrice: 50,
-    discountedPrice: 25,
-    image: "https://images.unsplash.com/photo-1607623814075-e51df1bdc82f",
-    distance: 1.2,
-    rating: 4.9,
-    availableUntil: "Today 6pm",
-  },
-  {
-    id: 6,
-    name: "Mystery Pastry Box",
-    shop: "Sweet Delights",
-    type: "bakery",
-    category: "mystery",
-    originalPrice: 45,
-    discountedPrice: 22.5,
-    image: "https://images.unsplash.com/photo-1517433367423-c7e5b0f35086",
-    distance: 2.1,
-    rating: 4.4,
-    availableUntil: "Today 8pm",
-  },
+// Transform data from bakeries and supermarkets into a unified format
+const transformedItems = [
+  ...data.bakeries.flatMap((bakery) =>
+    bakery.items.map((item) => ({
+      id: item.id,
+      name: item.name,
+      shop: bakery.name,
+      type: "bakery",
+      category: item.name.toLowerCase().includes("mystery")
+        ? "mystery"
+        : item.name.toLowerCase().includes("bread")
+        ? "bread"
+        : "pastries",
+      originalPrice: item.originalPrice,
+      discountedPrice: item.discountedPrice,
+      image: item.image,
+      distance: Math.random() * 5, // In a real app, this would be calculated based on user's location
+      rating: bakery.rating,
+      availableUntil: item.pickupPeriod,
+      quantity: item.quantity,
+    }))
+  ),
+  ...data.supermarkets.flatMap((supermarket) =>
+    supermarket.items.map((item) => ({
+      id: item.id,
+      name: item.name,
+      shop: supermarket.name,
+      type: "supermarket",
+      category: item.name.toLowerCase().includes("meat") ? "meat" : "produce",
+      originalPrice: item.originalPrice,
+      discountedPrice: item.discountedPrice,
+      image: item.image,
+      distance: Math.random() * 5, // In a real app, this would be calculated based on user's location
+      rating: supermarket.rating,
+      availableUntil: item.pickupPeriod,
+      quantity: item.quantity,
+    }))
+  ),
 ];
 
 type SortOption = "nearest" | "bestDeals" | "rating";
@@ -111,7 +70,7 @@ export default function BrowseAllPage() {
   const isMobile = useMobile();
 
   // Filter items based on category and search query
-  const filteredItems = mockItems.filter((item) => {
+  const filteredItems = transformedItems.filter((item) => {
     const matchesCategory =
       activeCategory === "all" || item.category === activeCategory;
     const matchesSearch =

@@ -1,0 +1,296 @@
+{
+  "bakeries": [
+    {
+      "id": 1,
+      "name": "Sweet Dreams Bakery",
+      "rating": 4.8,
+      "image": "https://images.unsplash.com/photo-1568254183919-78a4f43a2877",
+      "location": "123 Orchard Road",
+      "items": [
+        {
+          "id": "b1-1",
+          "name": "Mystery Bread Bundle",
+          "description": "10 pieces of assorted premium breads",
+          "originalPrice": 40.0,
+          "discountedPrice": 20.0,
+          "quantity": 5,
+          "pickupPeriod": "5:00 PM - 7:00 PM",
+          "image": "https://images.unsplash.com/photo-1608198093002-ad4e005484ec"
+        },
+        {
+          "id": "b1-2",
+          "name": "Artisan Sourdough",
+          "description": "Freshly baked sourdough bread",
+          "originalPrice": 8.9,
+          "discountedPrice": 4.45,
+          "quantity": 3,
+          "pickupPeriod": "5:00 PM - 7:00 PM",
+          "image": "https://images.unsplash.com/photo-1585478259715-4d3f8d9427f9"
+        },
+        {
+          "id": "b1-3",
+          "name": "Croissant Box",
+          "description": "6 butter croissants",
+          "originalPrice": 18.0,
+          "discountedPrice": 9.0,
+          "quantity": 4,
+          "pickupPeriod": "4:00 PM - 6:00 PM",
+          "image": "https://images.unsplash.com/photo-1555507036-ab1f4038808a"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Bread Haven",
+      "rating": 4.6,
+      "image": "https://images.unsplash.com/photo-1579697096985-41fe1430e5df",
+      "location": "456 Somerset Road",
+      "items": [
+        {
+          "id": "b2-1",
+          "name": "Daily Bread Box",
+          "description": "8 pieces of mixed daily breads",
+          "originalPrice": 32.0,
+          "discountedPrice": 16.0,
+          "quantity": 3,
+          "pickupPeriod": "6:00 PM - 8:00 PM",
+          "image": "https://images.unsplash.com/photo-1509440159596-0249088772ff"
+        },
+        {
+          "id": "b2-2",
+          "name": "Pastry Bundle",
+          "description": "5 assorted pastries",
+          "originalPrice": 25.0,
+          "discountedPrice": 12.5,
+          "quantity": 6,
+          "pickupPeriod": "5:30 PM - 7:30 PM",
+          "image": "https://images.unsplash.com/photo-1517433367423-c7e5b0f35086"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Golden Crust",
+      "rating": 4.9,
+      "image": "https://images.unsplash.com/photo-1579697096985-41fe1430e5df",
+      "location": "789 Tampines Central",
+      "items": [
+        {
+          "id": "b3-1",
+          "name": "Luxury Bread Bundle",
+          "description": "7 premium artisan breads",
+          "originalPrice": 45.0,
+          "discountedPrice": 22.5,
+          "quantity": 2,
+          "pickupPeriod": "7:00 PM - 9:00 PM",
+          "image": "https://images.unsplash.com/photo-1509440159596-0249088772ff"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "The French Bakery",
+      "rating": 4.7,
+      "image": "https://images.unsplash.com/photo-1579697096985-41fe1430e5df",
+      "location": "321 Serangoon Central",
+      "items": [
+        {
+          "id": "b4-1",
+          "name": "French Classics Box",
+          "description": "6 classic French pastries",
+          "originalPrice": 35.0,
+          "discountedPrice": 17.5,
+          "quantity": 4,
+          "pickupPeriod": "6:00 PM - 8:00 PM",
+          "image": "https://images.unsplash.com/photo-1586444248902-2f64eddc13df"
+        },
+        {
+          "id": "b4-2",
+          "name": "Baguette Bundle",
+          "description": "3 fresh baguettes",
+          "originalPrice": 15.0,
+          "discountedPrice": 7.5,
+          "quantity": 5,
+          "pickupPeriod": "5:00 PM - 7:00 PM",
+          "image": "https://images.unsplash.com/photo-1597079840142-c6499d74906a"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Asian Delights Bakery",
+      "rating": 4.5,
+      "image": "https://images.unsplash.com/photo-1608198093002-ad4e005484ec",
+      "location": "567 Jurong East",
+      "items": [
+        {
+          "id": "b5-1",
+          "name": "Asian Buns Box",
+          "description": "10 assorted Asian-style buns",
+          "originalPrice": 30.0,
+          "discountedPrice": 15.0,
+          "quantity": 6,
+          "pickupPeriod": "5:30 PM - 7:30 PM",
+          "image": "https://images.unsplash.com/photo-1606149059549-6042addafc5a"
+        }
+      ]
+    }
+  ],
+  "supermarkets": [
+    {
+      "id": 1,
+      "name": "FreshMart",
+      "rating": 4.5,
+      "image": "https://images.unsplash.com/photo-1578916171728-46686eac8d58",
+      "location": "321 Jurong East",
+      "items": [
+        {
+          "id": "s1-1",
+          "name": "Fresh Produce Box",
+          "description": "Mixed vegetables and fruits",
+          "originalPrice": 30.0,
+          "discountedPrice": 15.0,
+          "quantity": 8,
+          "pickupPeriod": "8:00 PM - 9:30 PM",
+          "image": "https://images.unsplash.com/photo-1610348725531-843dff563e2c"
+        },
+        {
+          "id": "s1-2",
+          "name": "Dairy Bundle",
+          "description": "Assorted dairy products",
+          "originalPrice": 25.0,
+          "discountedPrice": 12.5,
+          "quantity": 5,
+          "pickupPeriod": "7:30 PM - 9:00 PM",
+          "image": "https://images.unsplash.com/photo-1628088062854-d1870b4553da"
+        },
+        {
+          "id": "s1-3",
+          "name": "Meat Package",
+          "description": "Selected cuts of meat",
+          "originalPrice": 50.0,
+          "discountedPrice": 25.0,
+          "quantity": 3,
+          "pickupPeriod": "7:00 PM - 8:30 PM",
+          "image": "https://images.unsplash.com/photo-1607623814075-e51df1bdc82f"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "SuperValue",
+      "rating": 4.3,
+      "image": "https://images.unsplash.com/photo-1515706886582-54c73c5eaf41",
+      "location": "654 Woodlands Central",
+      "items": [
+        {
+          "id": "s2-1",
+          "name": "Pantry Essentials Box",
+          "description": "Basic pantry items",
+          "originalPrice": 40.0,
+          "discountedPrice": 20.0,
+          "quantity": 6,
+          "pickupPeriod": "8:30 PM - 10:00 PM",
+          "image": "https://images.unsplash.com/photo-1578916171728-46686eac8d58"
+        },
+        {
+          "id": "s2-2",
+          "name": "Snack Bundle",
+          "description": "Assorted snacks and treats",
+          "originalPrice": 35.0,
+          "discountedPrice": 17.5,
+          "quantity": 4,
+          "pickupPeriod": "7:00 PM - 8:30 PM",
+          "image": "https://images.unsplash.com/photo-1621939514649-280e2ee25f60"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "GreenGrocer",
+      "rating": 4.7,
+      "image": "https://images.unsplash.com/photo-1604719312566-8912e9227c6a",
+      "location": "987 Bedok North",
+      "items": [
+        {
+          "id": "s3-1",
+          "name": "Organic Veggie Box",
+          "description": "Fresh organic vegetables",
+          "originalPrice": 45.0,
+          "discountedPrice": 22.5,
+          "quantity": 4,
+          "pickupPeriod": "7:30 PM - 9:00 PM",
+          "image": "https://images.unsplash.com/photo-1590779033100-9f60a05a013d"
+        },
+        {
+          "id": "s3-2",
+          "name": "Premium Fruit Bundle",
+          "description": "Selected seasonal fruits",
+          "originalPrice": 50.0,
+          "discountedPrice": 25.0,
+          "quantity": 3,
+          "pickupPeriod": "8:00 PM - 9:30 PM",
+          "image": "https://images.unsplash.com/photo-1619566636858-adf3ef46400b"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "MegaMart",
+      "rating": 4.4,
+      "image": "https://images.unsplash.com/photo-1586611292717-f828b167408c",
+      "location": "432 Ang Mo Kio Central",
+      "items": [
+        {
+          "id": "s4-1",
+          "name": "Family Value Pack",
+          "description": "Essential groceries for family",
+          "originalPrice": 80.0,
+          "discountedPrice": 40.0,
+          "quantity": 3,
+          "pickupPeriod": "8:00 PM - 9:30 PM",
+          "image": "https://images.unsplash.com/photo-1579113800032-c38bd7635818"
+        },
+        {
+          "id": "s4-2",
+          "name": "Breakfast Bundle",
+          "description": "Cereals, milk, and breakfast items",
+          "originalPrice": 35.0,
+          "discountedPrice": 17.5,
+          "quantity": 5,
+          "pickupPeriod": "7:00 PM - 8:30 PM",
+          "image": "https://images.unsplash.com/photo-1517433670267-08bbd4be890f"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Asian Grocery",
+      "rating": 4.6,
+      "image": "https://images.unsplash.com/photo-1542838132-92c53300491e",
+      "location": "789 Tampines East",
+      "items": [
+        {
+          "id": "s5-1",
+          "name": "Asian Ingredients Box",
+          "description": "Essential Asian cooking ingredients",
+          "originalPrice": 55.0,
+          "discountedPrice": 27.5,
+          "quantity": 4,
+          "pickupPeriod": "7:30 PM - 9:00 PM",
+          "image": "https://images.unsplash.com/photo-1587132137056-bfbf0166836e"
+        },
+        {
+          "id": "s5-2",
+          "name": "Fresh Noodles Bundle",
+          "description": "Various types of fresh noodles",
+          "originalPrice": 30.0,
+          "discountedPrice": 15.0,
+          "quantity": 6,
+          "pickupPeriod": "6:30 PM - 8:00 PM",
+          "image": "https://images.unsplash.com/photo-1585032226651-759b368d7246"
+        }
+      ]
+    }
+  ]
+}

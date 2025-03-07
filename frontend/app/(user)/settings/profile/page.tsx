@@ -14,7 +14,7 @@ export default function ProfileSettingsPage() {
     <div className="flex flex-col min-h-screen bg-muted">
       <div className={isMobile ? "px-4" : "px-8"}>
         <div className="max-w-[600px] mx-auto py-6">
-          <h1 className="text-2xl font-bold mb-6">Profile Settings</h1>
+          <h1 className="text-2xl font-medium mb-6">Profile Settings</h1>
 
           <div className="bg-background rounded-lg border p-6">
             <div className="space-y-6">

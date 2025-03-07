@@ -1,148 +1,98 @@
 "use client";
 
-import { CategoryFilter } from "@/components/category-filter";
-import { FoodItemCard } from "@/components/food-item-card";
 import { SearchHeader } from "@/components/search-header";
-import { useMobile } from "@/hooks/use-mobile";
-import { CakeSlice, Coffee, Pizza, ShoppingBag } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import data from "@/lib/data.json";
+import { Cake, Cookie, ShoppingBag } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 
-const categories = [
-  { id: "all", name: "All Items", icon: <ShoppingBag className="h-4 w-4" /> },
-  {
-    id: "mystery",
-    name: "Mystery Bags",
-    icon: <ShoppingBag className="h-4 w-4" />,
-  },
-  { id: "bread", name: "Bread", icon: <Pizza className="h-4 w-4" /> },
-  { id: "pastries", name: "Pastries", icon: <Coffee className="h-4 w-4" /> },
-  { id: "cakes", name: "Cakes", icon: <CakeSlice className="h-4 w-4" /> },
-];
-
-// Mock data - in real app this would come from an API
-const mockItems = [
-  {
-    id: 101,
-    name: "Mystery Bread Bag",
-    shop: "Happy Bakery",
-    type: "bakery",
-    category: "mystery",
-    originalPrice: 40,
-    discountedPrice: 20,
-    image: "https://images.unsplash.com/photo-1608198093002-ad4e005484ec",
-    distance: 0.8,
-    rating: 4.5,
-    availableUntil: "Today 9pm",
-  },
-  {
-    id: 102,
-    name: "Assorted Pastries Box",
-    shop: "Happy Bakery",
-    type: "bakery",
-    category: "pastries",
-    originalPrice: 30,
-    discountedPrice: 15,
-    image: "https://images.unsplash.com/photo-1517433670267-08bbd4be890f",
-    distance: 0.8,
-    rating: 4.5,
-    availableUntil: "Today 8pm",
-  },
-  {
-    id: 201,
-    name: "Daily Bread Bundle",
-    shop: "Sweet Delights",
-    type: "bakery",
-    category: "bread",
-    originalPrice: 35,
-    discountedPrice: 17.5,
-    image: "https://images.unsplash.com/photo-1509440159596-0249088772ff",
-    distance: 1.2,
-    rating: 4.8,
-    availableUntil: "Today 7pm",
-  },
-  {
-    id: 202,
-    name: "Birthday Cake Pack",
-    shop: "Sweet Delights",
-    type: "bakery",
-    category: "cakes",
-    originalPrice: 50,
-    discountedPrice: 25,
-    image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587",
-    distance: 1.2,
-    rating: 4.9,
-    availableUntil: "Today 7pm",
-  },
-];
-
-type SortOption = "nearest" | "bestDeals" | "rating";
-
 export default function BakeriesPage() {
-  const [activeCategory, setActiveCategory] = useState("all");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [sortBy, setSortBy] = useState<SortOption>("nearest");
-  const isMobile = useMobile();
+  const [searchValue, setSearchValue] = useState("");
+  const [activeCategory, setActiveCategory] = useState<string>("all");
 
-  // Filter items based on category and search query
-  const filteredItems = mockItems.filter((item) => {
-    const matchesCategory =
-      activeCategory === "all" || item.category === activeCategory;
-    const matchesSearch =
-      searchQuery === "" ||
-      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.shop.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+  const categories = [
+    { id: "all", name: "All", icon: <ShoppingBag className="h-4 w-4" /> },
+    { id: "bread", name: "Bread", icon: <Cookie className="h-4 w-4" /> },
+    { id: "pastry", name: "Pastry", icon: <Cake className="h-4 w-4" /> },
+    {
+      id: "bundle",
+      name: "Bundles",
+      icon: <ShoppingBag className="h-4 w-4" />,
+    },
+  ];
 
-  // Sort items based on selected sort option
-  const sortedItems = [...filteredItems].sort((a, b) => {
-    switch (sortBy) {
-      case "nearest":
-        return a.distance - b.distance;
-      case "bestDeals":
-        const aDiscount =
-          (a.originalPrice - a.discountedPrice) / a.originalPrice;
-        const bDiscount =
-          (b.originalPrice - b.discountedPrice) / b.originalPrice;
-        return bDiscount - aDiscount;
-      case "rating":
-        return b.rating - a.rating;
-      default:
-        return 0;
+  const filteredBakeries = data.bakeries.filter((bakery) => {
+    if (searchValue) {
+      return (
+        bakery.name.toLowerCase().includes(searchValue.toLowerCase()) ||
+        bakery.location.toLowerCase().includes(searchValue.toLowerCase())
+      );
     }
+    return true;
   });
 
   return (
-    <div className="flex flex-col min-h-screen bg-muted">
-      {/* Header Section */}
-      <div className="w-full">
-        <SearchHeader
-          placeholder="Search bakery items..."
-          onSearch={setSearchQuery}
-          onSort={setSortBy}
-          sortBy={sortBy}
-        />
-        <div className={isMobile ? "px-4" : "px-8 py-2"}>
-          <CategoryFilter
-            categories={categories}
-            activeCategory={activeCategory}
-            onCategoryChange={setActiveCategory}
-          />
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className={isMobile ? "px-4" : "px-8"}>
-        <div className="max-w-[1600px] mx-auto">
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {sortedItems.map((item) => (
-              <FoodItemCard
-                key={item.id}
-                {...item}
-                distance={`${item.distance} km`}
-              />
-            ))}
-          </div>
+    <div className="min-h-screen">
+      <SearchHeader
+        onSearch={setSearchValue}
+        placeholder="Search bakeries..."
+        categories={categories}
+        activeCategory={activeCategory}
+        onCategoryChange={setActiveCategory}
+      />
+      <div className="max-w-[1600px] mx-auto py-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredBakeries.map((bakery) => (
+            <Link href={`/browse/bakeries/${bakery.id}`} key={bakery.id}>
+              <Card className="overflow-hidden hover:shadow-lg transition-shadow !p-0 h-[600px] flex flex-col">
+                <div className="aspect-[4/3] relative">
+                  <Image
+                    src={bakery.image}
+                    alt={bakery.name}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <div className="px-6 pb-3 flex-1 overflow-auto">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-semibold">{bakery.name}</h3>
+                    <Badge variant="secondary">
+                      ⭐ {bakery.rating.toFixed(1)}
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    {bakery.location}
+                  </p>
+                  <div className="space-y-2">
+                    {bakery.items.map((item) => (
+                      <div
+                        key={item.id}
+                        className="flex items-center justify-between border-b pb-2 last:border-0"
+                      >
+                        <div>
+                          <p className="font-medium">{item.name}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {item.description}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm line-through text-muted-foreground">
+                            ${item.originalPrice.toFixed(2)}
+                          </p>
+                          <p className="font-bold text-primary">
+                            ${item.discountedPrice.toFixed(2)}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </Card>
+            </Link>
+          ))}
         </div>
       </div>
     </div>
