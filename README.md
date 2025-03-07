@@ -1,6 +1,6 @@
-# Gloria - Food Waste Reduction Platform
+# Grub - Food Waste Reduction Platform
 
-Gloria is a modern web application designed to combat food waste by connecting consumers with bakeries and supermarkets to purchase surplus food items at discounted prices. The platform facilitates last-minute food reservations while helping businesses reduce waste and maintain profitability.
+Grub is a modern web application designed to combat food waste by connecting consumers with bakeries and supermarkets to purchase surplus food items at discounted prices. The platform facilitates last-minute food reservations while helping businesses reduce waste and maintain profitability.
 
 ## Overview
 
@@ -86,7 +86,7 @@ The application serves three main user types:
 - Real-time updates via WebSocket
 - Async processing for ML operations
 
-### Features
+# Features
 
 #### For Consumers
 
