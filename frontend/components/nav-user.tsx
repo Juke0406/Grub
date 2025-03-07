@@ -1,19 +1,18 @@
-"use client"
+"use client";
 
+import { usePortalStore, type Portal } from "@/lib/store";
 import {
   BadgeCheck,
   Bell,
   ChevronsUpDown,
   CreditCard,
   LogOut,
-  Sparkles,
-} from "lucide-react"
+  Store,
+  User,
+  type LucideIcon,
+} from "lucide-react";
 
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,24 +21,24 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
 
 export function NavUser({
   user,
 }: {
   user: {
-    name: string
-    email: string
-    avatar: string
-  }
+    name: string;
+    email: string;
+    avatar: string;
+  };
 }) {
-  const { isMobile } = useSidebar()
+  const { isMobile } = useSidebar();
 
   return (
     <SidebarMenu>
@@ -81,10 +80,12 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <Sparkles />
-                Upgrade to Pro
-              </DropdownMenuItem>
+              <DropdownMenuLabel className="font-normal">
+                <span className="text-xs font-semibold uppercase text-muted-foreground">
+                  Switch Portal
+                </span>
+              </DropdownMenuLabel>
+              <PortalSwitcher />
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
@@ -110,5 +111,42 @@ export function NavUser({
         </DropdownMenu>
       </SidebarMenuItem>
     </SidebarMenu>
-  )
+  );
+}
+
+function PortalSwitcher() {
+  const { currentPortal, setPortal } = usePortalStore();
+
+  const items: { value: Portal; label: string; icon: LucideIcon }[] = [
+    {
+      value: "user",
+      label: "User Portal",
+      icon: User,
+    },
+    {
+      value: "business",
+      label: "Business Portal",
+      icon: Store,
+    },
+  ];
+
+  return (
+    <>
+      {items.map(({ value, label, icon: Icon }) => (
+        <DropdownMenuItem
+          key={value}
+          onClick={() => setPortal(value)}
+          className="flex items-center gap-2"
+        >
+          <Icon className="size-4" />
+          <span>{label}</span>
+          {currentPortal === value && (
+            <span className="ml-auto text-accent-foreground">
+              <BadgeCheck className="size-4" />
+            </span>
+          )}
+        </DropdownMenuItem>
+      ))}
+    </>
+  );
 }

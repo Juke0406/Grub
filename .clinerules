@@ -1,0 +1,30 @@
+User usage
+fcfs reserve, trust system
+Bakery usage
+list bundle, bread, price, discounted price, sale period, available pick up period
+Super market usage
+api interface to list price, discounted price, sale period, available pick up period
+
+App that reserves unsold/leftover food for the day
+Businesses to use: Bakeries/ Supermarkets
+Target Audience: People who want to buy cheaper foods but dont mind food that are almost expiring soon since they plan to consume before expiry anyways
+
+Benefits for user
+Cheaper food (e.g. lowest costing bread is 4 bucks, mystery bag is 10 bread/bag; mystery bag price should always be 50% off 40 bucks regardless of what leftover bread is in the bag; entice people to always think the mystery bag is super worth)
+
+Benefits for SDG:
+saves food wastage
+
+Benefits for Barkery/supermarkets
+still earn money while not wasting food
+
+Key features for users:
+reserve food they want
+if they dont show up for food they reserver (rating system implement punishment by minusing score)
+
+Key features for bakeries
+list bundles, bread, price, discounted price, sales period, available pickup period
+use a mockup ml model simulation to show suggestions on how many items to make for the day etc based on data collection (maybe)
+
+Key features for supermarkets,
+normal interface system or can have API to access publishing their items on the app
