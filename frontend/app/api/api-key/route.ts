@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 
-// In-memory API keys (Sample Data)
 const apiKeys: { key: string; userId: string; expiresAt: Date; usageCount: number }[] = [
   {
     key: crypto.randomBytes(32).toString("hex"),
