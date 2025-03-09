@@ -1,3 +1,13 @@
+/*
+The several use case in the main application for API keys
+1. Listing of all API keys for a particular user
+2. Creation of a new API key for a particular user (possible to have multiple keys per user, expiry date can be set)
+3. Deletion of an existing API key
+4. Updating the usage count for a given API key (mainly used by the side application)
+
+The side application will directly call the products API to pass it a json list of sample grocery products that are expiring soon.
+*/
+
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 
