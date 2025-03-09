@@ -28,7 +28,7 @@ def demo_action():
             "quantity": 10,
             "description": "1 gallon of whole milk",
             "category": "Dairy",
-            "expiry_date": (datetime.now() + timedelta(days=5)).strftime('%Y-%m-%d')
+            "expirationDate": (datetime.now() + timedelta(days=5)).strftime('%Y-%m-%d')
         },
         {
             "SKU": "002",
@@ -39,7 +39,7 @@ def demo_action():
             "quantity": 15,
             "description": "Loaf of whole wheat bread",
             "category": "Bakery",
-            "expiry_date": (datetime.now() + timedelta(days=3)).strftime('%Y-%m-%d')
+            "expirationDate": (datetime.now() + timedelta(days=3)).strftime('%Y-%m-%d')
         },
         {
             "SKU": "003",
@@ -50,7 +50,7 @@ def demo_action():
             "quantity": 8,
             "description": "Dozen organic eggs",
             "category": "Dairy",
-            "expiry_date": (datetime.now() + timedelta(days=6)).strftime('%Y-%m-%d')
+            "expirationDate": (datetime.now() + timedelta(days=6)).strftime('%Y-%m-%d')
         },
         {
             "SKU": "004",
@@ -61,7 +61,7 @@ def demo_action():
             "quantity": 20,
             "description": "Fresh lettuce",
             "category": "Produce",
-            "expiry_date": (datetime.now() + timedelta(days=2)).strftime('%Y-%m-%d')
+            "expirationDate": (datetime.now() + timedelta(days=2)).strftime('%Y-%m-%d')
         },
         {
             "SKU": "005",
@@ -72,7 +72,7 @@ def demo_action():
             "quantity": 12,
             "description": "Boneless skinless chicken breast",
             "category": "Meat",
-            "expiry_date": (datetime.now() + timedelta(days=4)).strftime('%Y-%m-%d')
+            "expirationDate": (datetime.now() + timedelta(days=4)).strftime('%Y-%m-%d')
         }
     ]
 
@@ -86,7 +86,7 @@ def demo_action():
         print(f"Quantity: {product['quantity']}")
         print(f"Description: {product['description']}")
         print(f"Category: {product['category']}")
-        print(f"Expiry Date: {product['expiry_date']}")
+        print(f"Expiry Date: {product['expirationDate']}")
         print("-" * 40)
 
     # Send a POST request to the API
@@ -94,6 +94,19 @@ def demo_action():
     headers = {"Content-Type": "application/json"}
     response = requests.post(url, json=products, headers=headers)
     print("Response:", response.json())
+
+    api_key = api_key_var.get()
+    if not api_key:
+        print("API Key is required for update")
+        return
+    
+    # send a patch request to the API
+    print(api_key)
+    for product in products:
+        url = "http://localhost:3000/api/api-key"
+        headers = {"Content-Type": "application/json"}
+        response = requests.patch(url, json={"key": api_key}, headers=headers)
+        print("Response:", response)
 
 # Initialize main window
 root = tk.Tk()

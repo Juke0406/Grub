@@ -12,3 +12,5 @@ python3 main.py
 ```
 
 As this is a demo application, pressing the "demo" button will send a json list of products to the GRUB applicaiton.
+
+It is recommended to visit localhost:3000/api/api-keys and fill in any of the API key to demonstrate API key usage value increasing.

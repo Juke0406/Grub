@@ -51,11 +51,15 @@ export async function POST(req: Request) {
 export async function PATCH(req: Request) {
   const { key } = await req.json();
 
+  console.log("Received API key:", key);
+
   if (!key) {
     return NextResponse.json({ error: "API key is required" }, { status: 400 });
   }
 
   const apiKey = apiKeys.find((apiKey) => apiKey.key === key);
+
+  console.log("Found API key:", apiKey);
 
   if (!apiKey) {
     return NextResponse.json({ error: "API key not found" }, { status: 404 });
