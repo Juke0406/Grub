@@ -86,9 +86,9 @@ The application serves three main user types:
 - Real-time updates via WebSocket
 - Async processing for ML operations
 
-# Features
+## Features
 
-#### For Consumers
+### For Consumers
 
 - FCFS (First Come, First Served) reservation system
 - Browse available items from bakeries and supermarkets
@@ -96,7 +96,7 @@ The application serves three main user types:
 - Reputation system tracking pickup reliability
 - Active reservation management
 
-#### For Bakeries
+### For Bakeries
 
 - Bundle management system
 - Product listing with:
@@ -106,7 +106,7 @@ The application serves three main user types:
 - Dashboard with sales analytics
 - ML-based inventory suggestions
 
-#### For Supermarkets
+### For Supermarkets
 
 - RESTful API integration
 - Bulk item listing
@@ -115,7 +115,7 @@ The application serves three main user types:
 
 ## Project Structure
 
-```
+```bash
 gloria/
 ├── frontend/                 # Next.js frontend application
 │   ├── app/                 # App router pages
@@ -153,48 +153,48 @@ gloria/
 
 1. Clone the repository
 
-```bash
-git clone [repository-url]
-cd gloria
-```
+    ```bash
+    git clone [repository-url]
+    cd gloria
+    ```
 
 2. Install frontend dependencies
 
-```bash
-cd frontend
-pnpm install
-```
+    ```bash
+    cd frontend
+    pnpm install
+    ```
 
 3. Set up environment variables
 
-```bash
-# Frontend
-cp frontend/.env.example frontend/.env.local
+    ```bash
+    # Frontend
+    cp frontend/.env.example frontend/.env.local
 
-# Services
-cp services/auth-service/.env.example services/auth-service/.env
-cp services/reservation-service/.env.example services/reservation-service/.env
-# ... repeat for other services
-```
+    # Services
+    cp services/auth-service/.env.example services/auth-service/.env
+    cp services/reservation-service/.env.example services/reservation-service/.env
+    # ... repeat for other services
+    ```
 
 4. Start infrastructure services
 
-```bash
-docker compose -f infrastructure/docker-compose.yml up -d
-```
+    ```bash
+    docker compose -f infrastructure/docker-compose.yml up -d
+    ```
 
 5. Deploy microservices (development)
 
-```bash
-kubectl apply -f infrastructure/kubernetes/dev/
-```
+    ```bash
+    kubectl apply -f infrastructure/kubernetes/dev/
+    ```
 
 6. Run the frontend development server
 
-```bash
-cd frontend
-pnpm dev
-```
+    ```bash
+    cd frontend
+    pnpm dev
+    ```
 
 The application will be available at `http://localhost:3000`
 
@@ -202,15 +202,15 @@ The application will be available at `http://localhost:3000`
 
 1. Build service images
 
-```bash
-docker compose -f infrastructure/docker-compose.prod.yml build
-```
+    ```bash
+    docker compose -f infrastructure/docker-compose.prod.yml build
+    ```
 
 2. Deploy to Kubernetes
 
-```bash
-kubectl apply -f infrastructure/kubernetes/prod/
-```
+    ```bash
+    kubectl apply -f infrastructure/kubernetes/prod/
+    ```
 
 ## API Documentation
 
@@ -235,7 +235,7 @@ Base URL: `/api/integration/v1`
 
 All API requests must include an `Authorization` header with a valid API key:
 
-```
+```bash
 Authorization: Bearer <api_key>
 ```
 
@@ -243,7 +243,7 @@ Authorization: Bearer <api_key>
 
 ##### List Items
 
-```
+```bash
 POST /items/bulk
 Content-Type: application/json
 
@@ -267,7 +267,7 @@ Content-Type: application/json
 
 ##### Update Item Availability
 
-```
+```bash
 PATCH /items/{sku}
 Content-Type: application/json
 
