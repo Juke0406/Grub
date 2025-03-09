@@ -144,7 +144,6 @@ export async function PATCH(req: Request) {
 //   .then((res) => res.json())
 //   .then((data) => console.log("API Key Deleted:", data));
 // Note: If the key is not found, a 404 error will be returned
-
 export async function DELETE(req: Request) {
   const { key } = await req.json();
 
