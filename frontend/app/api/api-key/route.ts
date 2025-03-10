@@ -1,5 +1,6 @@
 // /*
 // The several use case in the main application for API keys
+// API can be communicated with on http://localhost:3000/api/api-key
 // 1. Listing of all API keys for a particular user
 // 2. Creation of a new API key for a particular user (possible to have multiple keys per user, expiry date can be set)
 // 3. Deletion of an existing API key
