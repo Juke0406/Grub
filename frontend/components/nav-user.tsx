@@ -31,6 +31,7 @@ import {
 import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { Button } from "react-day-picker";
 
 export function NavUser({
   user,
@@ -46,18 +47,21 @@ export function NavUser({
 
   const handleLogOut = () => {
     try {
-        authClient.signOut({
-            fetchOptions: {
-                onSuccess: () => {
-                    router.refresh();
-                }
-            }
-        });
-    }
-    catch (error) {
-        toast.error("Error logging out")
+      authClient.signOut({
+        fetchOptions: {
+          onSuccess: () => {
+            router.refresh();
+          },
+        },
+      });
+    } catch (error) {
+      toast.error("Error logging out");
     }
   };
+
+  if (user.name === "Guest") {
+    return <Button onClick={() => router.push("/login")}>Log in</Button>;
+  }
 
   return (
     <SidebarMenu>
@@ -70,7 +74,13 @@ export function NavUser({
             >
               <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                <AvatarFallback className="rounded-lg">
+                  {user.name
+                    .split(" ")
+                    .slice(0, 2)
+                    .map((word) => word[0].toUpperCase())
+                    .join("")}
+                </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{user.name}</span>

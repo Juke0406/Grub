@@ -1,5 +1,7 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { usePortalStore } from "@/lib/store";
 import {
   Apple,
@@ -25,6 +27,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { authClient } from "@/lib/auth-client";
+import { Button } from "./ui/button";
 
 const userData = {
   user: {
@@ -169,7 +173,23 @@ const businessNavigation = [
 ];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const [user, setUser] = useState({ name: "", email: "", avatar: "" });
   const { currentPortal } = usePortalStore();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const { data: session } = await authClient.getSession();
+      setUser({
+        name: session?.user?.name || "",
+        email: session?.user?.email || "",
+        avatar: "",
+      });
+    };
+
+    fetchData();
+  }, [pathname]);
 
   return (
     <Sidebar variant="inset" {...props}>
@@ -203,7 +223,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavSecondary items={userData.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={userData.user} />
+        {user.name ? (
+          <NavUser user={user} />
+        ) : (
+          <Button onClick={() => router.push("/login")}>Login</Button>
+        )}
       </SidebarFooter>
     </Sidebar>
   );
