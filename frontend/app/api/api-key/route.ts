@@ -1,35 +1,34 @@
-/*
-The several use case in the main application for API keys
-1. Listing of all API keys for a particular user
-2. Creation of a new API key for a particular user (possible to have multiple keys per user, expiry date can be set)
-3. Deletion of an existing API key
-4. Updating the usage count for a given API key (mainly used by the side application)
+// /*
+// The several use case in the main application for API keys
+// API can be communicated with on http://localhost:3000/api/api-key
+// 1. Listing of all API keys for a particular user
+// 2. Creation of a new API key for a particular user (possible to have multiple keys per user, expiry date can be set)
+// 3. Deletion of an existing API key
+// 4. Updating the usage count for a given API key (mainly used by the side application)
 
-The side application will directly call the products API to pass it a json list of sample grocery products that are expiring soon.
-*/
+// The side application will directly call the products API to pass it a json list of sample grocery products that are expiring soon.
+// */
 
 import { NextResponse } from "next/server";
+import { MongoClient, Db } from "mongodb";
 import crypto from "crypto";
 
-const apiKeys: {
-  key: string;
-  userId: string;
-  expiresAt: Date;
-  usageCount: number;
-}[] = [
-  {
-    key: crypto.randomBytes(32).toString("hex"),
-    userId: "user-123",
-    expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
-    usageCount: 0, // Track how many times this API key is used
-  },
-  {
-    key: crypto.randomBytes(32).toString("hex"),
-    userId: "user-456",
-    expiresAt: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000), // 15 days from now
-    usageCount: 0,
-  },
-];
+const MONGODB_URI =
+  process.env.MONGODB_URI! ||
+  "mongodb+srv://admin:admin@cluster0.4imvo.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+const MONGODB_DB = "grubDB";
+
+let client: MongoClient | null = null;
+let db: Db | null = null;
+
+// Ensure we use a single MongoDB connection
+async function connectDB() {
+  if (!client) {
+    client = new MongoClient(MONGODB_URI);
+    await client.connect();
+    db = client.db(MONGODB_DB);
+  }
+}
 
 // The GET request handler returns all API keys or the keys for a specific user or a list of ALL keys
 // Usage: GET /api/api-key?userId=user-123
@@ -37,13 +36,18 @@ const apiKeys: {
 // Usage: GET /api/api-key
 // Returns: All API keys as JSON
 export async function GET(req: Request) {
+  await connectDB();
+  if (!db)
+    return NextResponse.json(
+      { error: "Database connection failed" },
+      { status: 500 }
+    );
+
   const { searchParams } = new URL(req.url);
   const userId = searchParams.get("userId");
 
-  if (userId) {
-    const userKeys = apiKeys.filter((key) => key.userId === userId);
-    return NextResponse.json(userKeys);
-  }
+  const filter = userId ? { userId } : {}; // Filter by userId if provided
+  const apiKeys = await db.collection("api_keys").find(filter).toArray();
 
   return NextResponse.json(apiKeys);
 }
@@ -63,6 +67,13 @@ export async function GET(req: Request) {
 // Note: if no expiry date is provided, the key will expire in 30 days
 export async function POST(req: Request) {
   try {
+    await connectDB();
+    if (!db)
+      return NextResponse.json(
+        { error: "Database connection failed" },
+        { status: 500 }
+      );
+
     const { userId, expiresAt } = await req.json();
 
     if (!userId) {
@@ -74,34 +85,25 @@ export async function POST(req: Request) {
 
     const apiKey = crypto.randomBytes(32).toString("hex");
 
-    // Use provided expiry date if valid, otherwise default to 30 days
-    const expiryDate = expiresAt
-      ? new Date(expiresAt)
-      : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-
-    if (isNaN(expiryDate.getTime())) {
-      return NextResponse.json(
-        { error: "Invalid expiry date format" },
-        { status: 400 }
-      );
-    }
-
     const newKey = {
       key: apiKey,
       userId,
-      expiresAt: expiryDate,
-      usageCount: 0, // Start with 0 usage
+      expiresAt: expiresAt
+        ? new Date(expiresAt)
+        : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // Default 30 days
+      usageCount: 0,
     };
 
-    apiKeys.push(newKey);
+    const result = await db.collection("api_keys").insertOne(newKey);
 
     return NextResponse.json({
-      apiKey: newKey.key,
+      apiKey,
       expiresAt: newKey.expiresAt,
+      id: result.insertedId,
     });
   } catch (error) {
-    console.error("Error creating API key:", error);
-    return NextResponse.json({ error: "Invalid request" }, { status: 500 });
+    console.log(error);
+    return NextResponse.json({ error: "Database error" }, { status: 500 });
   }
 }
 
@@ -109,29 +111,58 @@ export async function POST(req: Request) {
 // It is mainly used by the side application to update usage count for a given key
 // By providing a valid API key, the usage count will be incremented by 1
 export async function PATCH(req: Request) {
-  const { key } = await req.json();
+  try {
+    await connectDB();
+    if (!db)
+      return NextResponse.json(
+        { error: "Database connection failed" },
+        { status: 500 }
+      );
 
-  console.log("Received API key:", key);
+    const { key } = await req.json();
 
-  if (!key) {
-    return NextResponse.json({ error: "API key is required" }, { status: 400 });
+    if (!key) {
+      return NextResponse.json(
+        { error: "API key is required" },
+        { status: 400 }
+      );
+    }
+
+    // Check if the key exists before attempting an update
+    const apiKey = await db.collection("api_keys").findOne({ key });
+
+    if (!apiKey) {
+      return NextResponse.json({ error: "API key not found" }, { status: 404 });
+    }
+
+    const updateResult = await db
+      .collection("api_keys")
+      .updateOne({ key }, { $inc: { usageCount: 1 } });
+
+    if (updateResult.modifiedCount === 0) {
+      return NextResponse.json(
+        { error: "Failed to update API key usage" },
+        { status: 500 }
+      );
+    }
+
+    const updatedKey = await db.collection("api_keys").findOne({ key });
+
+    if (!updatedKey) {
+      return NextResponse.json(
+        { error: "Failed to retrieve updated API key" },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      message: "API key usage updated",
+      usageCount: updatedKey.usageCount,
+    });
+  } catch (error) {
+    console.log("Error updating API key:", error);
+    return NextResponse.json({ error: "Database error" }, { status: 500 });
   }
-
-  const apiKey = apiKeys.find((apiKey) => apiKey.key === key);
-
-  console.log("Found API key:", apiKey);
-
-  if (!apiKey) {
-    return NextResponse.json({ error: "API key not found" }, { status: 404 });
-  }
-
-  // Increment the usage count
-  apiKey.usageCount += 1;
-
-  return NextResponse.json({
-    message: "API key usage updated",
-    usageCount: apiKey.usageCount,
-  });
 }
 
 // The DELETE request handler removes an API key from the list
@@ -145,17 +176,32 @@ export async function PATCH(req: Request) {
 //   .then((data) => console.log("API Key Deleted:", data));
 // Note: If the key is not found, a 404 error will be returned
 export async function DELETE(req: Request) {
-  const { key } = await req.json();
+  try {
+    await connectDB();
+    if (!db)
+      return NextResponse.json(
+        { error: "Database connection failed" },
+        { status: 500 }
+      );
 
-  if (!key) {
-    return NextResponse.json({ error: "API key is required" }, { status: 400 });
+    const { key } = await req.json();
+
+    if (!key) {
+      return NextResponse.json(
+        { error: "API key is required" },
+        { status: 400 }
+      );
+    }
+
+    const result = await db.collection("api_keys").deleteOne({ key });
+
+    if (result.deletedCount === 0) {
+      return NextResponse.json({ error: "API key not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ message: "API key deleted" });
+  } catch (error) {
+    console.log(error);
+    return NextResponse.json({ error: "Database error" }, { status: 500 });
   }
-
-  const index = apiKeys.findIndex((apiKey) => apiKey.key === key);
-  if (index === -1) {
-    return NextResponse.json({ error: "API key not found" }, { status: 404 });
-  }
-
-  apiKeys.splice(index, 1);
-  return NextResponse.json({ message: "API key deleted" });
 }
