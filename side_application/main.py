@@ -28,6 +28,7 @@ def demo_action():
             "quantity": 10,
             "description": "1 gallon of whole milk",
             "category": "Dairy",
+            "userID": "user-test",
             "expirationDate": (datetime.now() + timedelta(days=5)).strftime('%Y-%m-%d')
         },
         {
@@ -39,6 +40,7 @@ def demo_action():
             "quantity": 15,
             "description": "Loaf of whole wheat bread",
             "category": "Bakery",
+            "userID": "user-test",
             "expirationDate": (datetime.now() + timedelta(days=3)).strftime('%Y-%m-%d')
         },
         {
@@ -50,6 +52,7 @@ def demo_action():
             "quantity": 8,
             "description": "Dozen organic eggs",
             "category": "Dairy",
+            "userID": "user-test",
             "expirationDate": (datetime.now() + timedelta(days=6)).strftime('%Y-%m-%d')
         },
         {
@@ -61,6 +64,7 @@ def demo_action():
             "quantity": 20,
             "description": "Fresh lettuce",
             "category": "Produce",
+            "userID": "user-test",
             "expirationDate": (datetime.now() + timedelta(days=2)).strftime('%Y-%m-%d')
         },
         {
@@ -72,6 +76,7 @@ def demo_action():
             "quantity": 12,
             "description": "Boneless skinless chicken breast",
             "category": "Meat",
+            "userID": "user-test",
             "expirationDate": (datetime.now() + timedelta(days=4)).strftime('%Y-%m-%d')
         }
     ]
