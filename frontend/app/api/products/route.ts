@@ -4,7 +4,7 @@ import { MongoClient } from 'mongodb';
 
 const uri =
   process.env.DB_CONN_STRING ||
-  "mongodb+srv://admin:admin@cluster0.4imvo.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+  "mongodb+srv://admin:admin@cluster0.4imvo.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0&tls=true&tlsAllowInvalidCertificates=true&tlsAllowInvalidHostnames=true";
 const dbName = process.env.DB_NAME || "productsDB";
 const collectionName = process.env.PRODUCTS_COLLECTION_NAME || "products";
 
@@ -42,17 +42,49 @@ export async function POST(req: NextRequest) {
     const data = await req.json();
     console.log("Received product data:", data);
 
-    // Validate incoming data.
-    const { name, description, price, quantity, expirationDate } = data;
-    if (!name || !description || !price || !quantity || !expirationDate) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
-    }
-
-    // Create the product document (embed inventory data).
-    const productDoc = {
+    // Destructure the new fields from the payload.
+    const {
+      SKU,
+      imageUrl,
       name,
       description,
-      price,
+      originalPrice,
+      discountedPrice,
+      quantity,
+      category,
+      userID,
+      expirationDate
+    } = data;
+
+    // Validate incoming data.
+    if (
+      !SKU ||
+      !imageUrl ||
+      !name ||
+      !description ||
+      originalPrice === undefined ||
+      discountedPrice === undefined ||
+      !quantity ||
+      !category ||
+      !userID ||
+      !expirationDate
+    ) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
+    // Create the product document, embedding inventory details.
+    const productDoc = {
+      SKU,
+      imageUrl,
+      name,
+      description,
+      originalPrice,
+      discountedPrice,
+      category,
+      userID,
       inventory: {
         quantity,
         expirationDate,
@@ -73,10 +105,16 @@ export async function POST(req: NextRequest) {
         id: insertResult.insertedId,
       });
     } else {
-      return NextResponse.json({ error: "Product creation failed" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Product creation failed" },
+        { status: 500 }
+      );
     }
   } catch (error) {
     console.error("Error creating product:", error);
-    return NextResponse.json({ error: "Failed to create product" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to create product" },
+      { status: 500 }
+    );
   }
 }
