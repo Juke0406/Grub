@@ -12,7 +12,6 @@ const collectionName = process.env.PRODUCTS_COLLECTION_NAME || "products";
 let cachedClient: MongoClient | null = null;
 
 async function connectToDatabase() {
-  // If there's no cached client, create one.
   if (!cachedClient) {
     cachedClient = new MongoClient(uri, {
       tls: true,
@@ -22,10 +21,8 @@ async function connectToDatabase() {
     await cachedClient.connect();
   } else {
     try {
-      // Ping the database to check if the connection is still alive.
       await cachedClient.db(dbName).command({ ping: 1 });
     } catch (error) {
-      // If ping fails, reconnect.
       cachedClient = new MongoClient(uri, {
         tls: true,
         tlsAllowInvalidCertificates: true,
@@ -42,79 +39,115 @@ export async function POST(req: NextRequest) {
     const data = await req.json();
     console.log("Received product data:", data);
 
-    // Destructure the new fields from the payload.
-    const {
-      SKU,
-      imageUrl,
-      name,
-      description,
-      originalPrice,
-      discountedPrice,
-      quantity,
-      category,
-      userID,
-      expirationDate
-    } = data;
-
-    // Validate incoming data.
-    if (
-      !SKU ||
-      !imageUrl ||
-      !name ||
-      !description ||
-      originalPrice === undefined ||
-      discountedPrice === undefined ||
-      !quantity ||
-      !category ||
-      !userID ||
-      !expirationDate
-    ) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
-      );
-    }
-
-    // Create the product document, embedding inventory details.
-    const productDoc = {
-      SKU,
-      imageUrl,
-      name,
-      description,
-      originalPrice,
-      discountedPrice,
-      category,
-      userID,
-      inventory: {
+    // Helper to validate a single product payload
+    const validateProduct = (product: any) => {
+      const {
+        SKU,
+        imageUrl,
+        name,
+        description,
+        originalPrice,
+        discountedPrice,
         quantity,
+        category,
+        userID,
         expirationDate,
-      },
-      createdAt: new Date(),
+      } = product;
+      if (
+        !SKU ||
+        !imageUrl ||
+        !name ||
+        !description ||
+        originalPrice === undefined ||
+        discountedPrice === undefined ||
+        !quantity ||
+        !category ||
+        !userID ||
+        !expirationDate
+      ) {
+        return false;
+      }
+      return true;
     };
 
-    // Connect to MongoDB and get the collection.
+    // Prepare documents to insert
+    let docs = [];
+
+    if (Array.isArray(data)) {
+      for (const product of data) {
+        if (!validateProduct(product)) {
+          return NextResponse.json(
+            { error: "Missing required fields in one or more products" },
+            { status: 400 }
+          );
+        }
+        docs.push({
+          SKU: product.SKU,
+          imageUrl: product.imageUrl,
+          name: product.name,
+          description: product.description,
+          originalPrice: product.originalPrice,
+          discountedPrice: product.discountedPrice,
+          category: product.category,
+          userID: product.userID,
+          inventory: {
+            quantity: product.quantity,
+            expirationDate: product.expirationDate,
+          },
+          createdAt: new Date(),
+        });
+      }
+    } else {
+      // Single product object
+      if (!validateProduct(data)) {
+        return NextResponse.json(
+          { error: "Missing required fields" },
+          { status: 400 }
+        );
+      }
+      docs.push({
+        SKU: data.SKU,
+        imageUrl: data.imageUrl,
+        name: data.name,
+        description: data.description,
+        originalPrice: data.originalPrice,
+        discountedPrice: data.discountedPrice,
+        category: data.category,
+        userID: data.userID,
+        inventory: {
+          quantity: data.quantity,
+          expirationDate: data.expirationDate,
+        },
+        createdAt: new Date(),
+      });
+    }
+
     const client = await connectToDatabase();
     const db = client.db(dbName);
     const productsCollection = db.collection(collectionName);
 
-    // Insert the product document.
-    const insertResult = await productsCollection.insertOne(productDoc);
-    if (insertResult.insertedId) {
-      return NextResponse.json({
-        message: "Product created successfully!",
-        id: insertResult.insertedId,
-      });
+    // Insert using insertMany if more than one, else insertOne
+    let insertResult;
+    if (docs.length > 1) {
+      insertResult = await productsCollection.insertMany(docs);
+      if (insertResult.insertedCount > 0) {
+        return NextResponse.json({
+          message: "Products created successfully!",
+          ids: insertResult.insertedIds,
+        });
+      }
     } else {
-      return NextResponse.json(
-        { error: "Product creation failed" },
-        { status: 500 }
-      );
+      insertResult = await productsCollection.insertOne(docs[0]);
+      if (insertResult.insertedId) {
+        return NextResponse.json({
+          message: "Product created successfully!",
+          id: insertResult.insertedId,
+        });
+      }
     }
+    return NextResponse.json({ error: "Product creation failed" }, { status: 500 });
   } catch (error) {
     console.error("Error creating product:", error);
-    return NextResponse.json(
-      { error: "Failed to create product" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to create product" }, { status: 500 });
   }
 }
