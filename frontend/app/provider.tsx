@@ -5,6 +5,7 @@ import { MobileNav } from "@/components/mobile-nav";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { useMobile } from "@/hooks/use-mobile";
 import { usePathname } from "next/navigation";
+import { Toaster } from "sonner";
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const isMobile = useMobile();
@@ -17,6 +18,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <SidebarProvider>
+      <Toaster />
       <AppSidebar />
       <SidebarInset>
         {isMobile ? (

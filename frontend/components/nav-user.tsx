@@ -29,9 +29,9 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { authClient } from "@/lib/auth-client";
-import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Button } from "react-day-picker";
+import { toast } from "sonner";
 
 export function NavUser({
   user,
@@ -45,17 +45,16 @@ export function NavUser({
   const { isMobile } = useSidebar();
   const router = useRouter();
 
-  const handleLogOut = () => {
+  const handleLogOut = async () => {
     try {
-      authClient.signOut({
-        fetchOptions: {
-          onSuccess: () => {
-            router.refresh();
-          },
-        },
-      });
-    } catch (error) {
-      toast.error("Error logging out");
+      await authClient.signOut();
+      window.location.reload();
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Error logging out");
+      }
     }
   };
 
