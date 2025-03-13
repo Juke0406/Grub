@@ -1,4 +1,4 @@
-import { Db, MongoClient } from "mongodb";
+import { Db, MongoClient, ObjectId } from "mongodb";
 
 declare global {
   var _mongoClientPromise: Promise<MongoClient> | undefined;
@@ -30,4 +30,19 @@ export async function getDatabase(databaseName?: string): Promise<Db> {
   const dbName = databaseName || process.env.DEFAULT_DATABASE || "default";
   const client = await clientPromise;
   return client.db(dbName);
+}
+
+/**
+ * Converts a string ID to MongoDB ObjectId
+ * @param id The string ID to convert
+ * @returns ObjectId instance or null if conversion fails
+ */
+export function toObjectId(id: string | null | undefined): ObjectId | null {
+  if (!id) return null;
+
+  try {
+    return new ObjectId(id);
+  } catch (error) {
+    return null;
+  }
 }

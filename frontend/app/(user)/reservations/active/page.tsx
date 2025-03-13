@@ -3,134 +3,20 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useReservations } from "@/hooks/use-reservations";
 import { useMobile } from "@/hooks/use-mobile";
 import { CheckCircle2, Clock, MapPin } from "lucide-react";
-import { Reservation } from "@/types/reservation";
-import { STATUS_BADGES } from "@/types/reservation";
-
-const mockReservations: Reservation[] = [
-  {
-    id: "res_1",
-    storeName: "Sweet Delights Bakery",
-    storeLocation: "123 Orchard Road, #01-45",
-    items: [
-      {
-        name: "Mystery Bread Bundle",
-        quantity: 1,
-        originalPrice: 40,
-        discountedPrice: 20,
-      },
-      {
-        name: "Assorted Pastries Pack",
-        quantity: 1,
-        originalPrice: 25,
-        discountedPrice: 12.5,
-      },
-    ],
-    status: "confirmed",
-    pickupTime: "2025-03-08T17:00:00",
-    pickupEndTime: "2025-03-08T18:00:00",
-    totalSavings: 32.5,
-    createdAt: "2025-03-08T10:25:00",
-  },
-  {
-    id: "res_2",
-    storeName: "FreshMart Supermarket",
-    storeLocation: "456 Tampines Mall, #02-12",
-    items: [
-      {
-        name: "Fresh Produce Bundle",
-        quantity: 1,
-        originalPrice: 30,
-        discountedPrice: 15,
-      },
-    ],
-    status: "ready",
-    pickupTime: "2025-03-08T16:00:00",
-    pickupEndTime: "2025-03-08T17:00:00",
-    totalSavings: 15,
-    createdAt: "2025-03-08T09:15:00",
-  },
-  {
-    id: "res_3",
-    storeName: "Artisan Breads",
-    storeLocation: "789 Somerset Road, #03-21",
-    items: [
-      {
-        name: "End-of-Day Bread Box",
-        quantity: 1,
-        originalPrice: 35,
-        discountedPrice: 17.5,
-      },
-    ],
-    status: "pending",
-    pickupTime: "2025-03-08T19:00:00",
-    pickupEndTime: "2025-03-08T20:00:00",
-    totalSavings: 17.5,
-    createdAt: "2025-03-08T11:30:00",
-  },
-];
-
-function ReservationCard({ reservation }: { reservation: Reservation }) {
-  const pickupDate = new Date(reservation.pickupTime);
-  const endPickupDate = new Date(reservation.pickupEndTime);
-  const status = STATUS_BADGES[reservation.status];
-
-  return (
-    <Card className="p-6 flex flex-col">
-      <div className="flex items-start justify-between mb-4">
-        <div>
-          <h3 className="font-semibold text-lg">{reservation.storeName}</h3>
-          <div className="flex items-center text-sm text-muted-foreground mt-1">
-            <MapPin className="h-4 w-4 mr-1" />
-            {reservation.storeLocation}
-          </div>
-        </div>
-        <Badge className={status.color}>{status.label}</Badge>
-      </div>
-
-      <div className="space-y-2 flex-1">
-        {reservation.items.map((item, index) => (
-          <div key={index} className="flex justify-between items-start text-sm">
-            <div>
-              <p>
-                {item.name} × {item.quantity}
-              </p>
-              <p className="text-muted-foreground text-xs mt-0.5">
-                Original: ${item.originalPrice.toFixed(2)}
-              </p>
-            </div>
-            <p className="font-medium">${item.discountedPrice.toFixed(2)}</p>
-          </div>
-        ))}
-      </div>
-
-      <div className="pt-4 border-t space-y-2 mt-4">
-        <div className="flex items-center text-sm">
-          <Clock className="h-4 w-4 mr-2" />
-          <span>
-            Pickup: {pickupDate.toLocaleTimeString()} -{" "}
-            {endPickupDate.toLocaleTimeString()}
-          </span>
-        </div>
-        <div className="flex items-center text-sm text-green-600">
-          <CheckCircle2 className="h-4 w-4 mr-2" />
-          <span>Total Savings: ${reservation.totalSavings.toFixed(2)}</span>
-        </div>
-      </div>
-
-      <div className="flex flex-wrap gap-2 mt-4 pt-4">
-        <Button className="flex-1 min-w-[180px]">Get Directions</Button>
-        <Button variant="outline" className="flex-1 min-w-[180px]">
-          View Details
-        </Button>
-      </div>
-    </Card>
-  );
-}
+import { Reservation, STATUS_BADGES } from "@/types/reservation";
+import { ReservationCard } from "@/components/reservation/reservation-card";
+import { ReservationSkeleton } from "@/components/reservation/reservation-skeleton";
+import { redirect } from "next/navigation";
 
 export default function ActiveReservationsPage() {
   const isMobile = useMobile();
+  const { reservations, isLoading, error } = useReservations({
+    status: "pending,confirmed,ready",
+  });
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -140,10 +26,43 @@ export default function ActiveReservationsPage() {
             <h1 className="text-2xl font-medium">Active Reservations</h1>
           </div>
 
+          {error && (
+            <div className="p-4 mb-4 text-red-700 bg-red-100 rounded-lg">
+              {error}
+            </div>
+          )}
+
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {mockReservations.map((reservation) => (
-              <ReservationCard key={reservation.id} reservation={reservation} />
-            ))}
+            {isLoading ? (
+              // Show skeletons while loading
+              Array(3)
+                .fill(0)
+                .map((_, index) => <ReservationSkeleton key={index} />)
+            ) : reservations.length > 0 ? (
+              // Show reservations if available
+              reservations.map((reservation) => (
+                <ReservationCard
+                  key={reservation.id}
+                  reservation={reservation}
+                />
+              ))
+            ) : (
+              // Show message if no reservations
+              <div className="col-span-full text-center py-12">
+                <h3 className="text-lg font-medium text-gray-500">
+                  No active reservations
+                </h3>
+                <p className="text-gray-400 mt-2">
+                  Browse available food items and make a reservation
+                </p>
+                <Button
+                  className="mt-4"
+                  onClick={() => redirect("/browse/all")}
+                >
+                  Browse Food
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </div>

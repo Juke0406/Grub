@@ -7,12 +7,11 @@ export interface Reservation {
     name: string;
     quantity: number;
     originalPrice: number;
-    discountedPrice: number;
+    discountPercentage: number;
   }[];
   status: "pending" | "confirmed" | "ready" | "completed" | "cancelled";
   pickupTime: string;
   pickupEndTime: string;
-  totalSavings: number;
   createdAt: string;
   rating?: {
     score: number;
