@@ -10,25 +10,8 @@
 // */
 
 import { NextResponse } from "next/server";
-import { MongoClient, Db } from "mongodb";
+import { getDatabase } from "@/lib/mongodb";
 import crypto from "crypto";
-
-const MONGODB_URI =
-  process.env.MONGODB_URI! ||
-  "mongodb+srv://admin:admin@cluster0.4imvo.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
-const MONGODB_DB = "grubDB";
-
-let client: MongoClient | null = null;
-let db: Db | null = null;
-
-// Ensure we use a single MongoDB connection
-async function connectDB() {
-  if (!client) {
-    client = new MongoClient(MONGODB_URI);
-    await client.connect();
-    db = client.db(MONGODB_DB);
-  }
-}
 
 // The GET request handler returns all API keys or the keys for a specific user or a list of ALL keys
 // Usage: GET /api/api-key?userId=user-123
@@ -36,7 +19,7 @@ async function connectDB() {
 // Usage: GET /api/api-key
 // Returns: All API keys as JSON
 export async function GET(req: Request) {
-  await connectDB();
+  const db = await getDatabase();
   if (!db)
     return NextResponse.json(
       { error: "Database connection failed" },
@@ -67,7 +50,7 @@ export async function GET(req: Request) {
 // Note: if no expiry date is provided, the key will expire in 30 days
 export async function POST(req: Request) {
   try {
-    await connectDB();
+    const db = await getDatabase();
     if (!db)
       return NextResponse.json(
         { error: "Database connection failed" },
@@ -112,7 +95,7 @@ export async function POST(req: Request) {
 // By providing a valid API key, the usage count will be incremented by 1
 export async function PATCH(req: Request) {
   try {
-    await connectDB();
+    const db = await getDatabase();
     if (!db)
       return NextResponse.json(
         { error: "Database connection failed" },
@@ -177,7 +160,7 @@ export async function PATCH(req: Request) {
 // Note: If the key is not found, a 404 error will be returned
 export async function DELETE(req: Request) {
   try {
-    await connectDB();
+    const db = await getDatabase();
     if (!db)
       return NextResponse.json(
         { error: "Database connection failed" },
