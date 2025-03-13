@@ -1,11 +1,11 @@
 // app/api/products/route.ts
-import { NextRequest, NextResponse } from 'next/server';
-import { MongoClient } from 'mongodb';
+import { NextRequest, NextResponse } from "next/server";
+import { MongoClient } from "mongodb";
 
 const uri =
   process.env.DB_CONN_STRING ||
   "mongodb+srv://admin:admin@cluster0.4imvo.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0&tls=true&tlsAllowInvalidCertificates=true&tlsAllowInvalidHostnames=true";
-const dbName = process.env.DB_NAME || "productsDB";
+const dbName = process.env.DATABASE_NAME || "grubDB";
 const collectionName = process.env.PRODUCTS_COLLECTION_NAME || "products";
 
 // Cache the MongoDB client between requests
@@ -145,9 +145,15 @@ export async function POST(req: NextRequest) {
         });
       }
     }
-    return NextResponse.json({ error: "Product creation failed" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Product creation failed" },
+      { status: 500 }
+    );
   } catch (error) {
     console.error("Error creating product:", error);
-    return NextResponse.json({ error: "Failed to create product" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to create product" },
+      { status: 500 }
+    );
   }
 }
