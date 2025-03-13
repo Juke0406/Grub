@@ -1,6 +1,75 @@
 // app/api/products/route.ts
 import { NextRequest, NextResponse } from "next/server";
+import { headers } from "next/headers";
+import { auth } from "@/lib/auth";
 import { getDatabase } from "@/lib/mongodb";
+
+export async function GET(request: NextRequest) {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session || !session.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const searchParams = request.nextUrl.searchParams;
+
+    // Extract query parameters with defaults
+    const category = searchParams.get("category");
+    const userId = searchParams.get("userId");
+    const limit = parseInt(searchParams.get("limit") || "20");
+    const page = parseInt(searchParams.get("page") || "1");
+    const skip = (page - 1) * limit;
+
+    // Build query object
+    const query: any = {};
+
+    // Add filters if provided
+    if (category) {
+      // Handle comma-separated categories
+      const categories = category.split(",");
+      query.category = { $in: categories };
+    }
+
+    if (userId) {
+      query.userID = userId;
+    }
+
+    // Get database connection
+    const db = await getDatabase();
+    const collection = db.collection("products");
+
+    // Execute query with pagination
+    const products = await collection
+      .find(query)
+      .sort({ expirationDate: 1 }) // Sort by expiration date (soonest first)
+      .skip(skip)
+      .limit(limit)
+      .toArray();
+
+    // Get total count for pagination
+    const total = await collection.countDocuments(query);
+
+    // Return response
+    return NextResponse.json({
+      products,
+      pagination: {
+        total,
+        page,
+        limit,
+        pages: Math.ceil(total / limit),
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch products" },
+      { status: 500 }
+    );
+  }
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -113,9 +182,15 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    return NextResponse.json({ error: "Product creation failed" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Product creation failed" },
+      { status: 500 }
+    );
   } catch (error) {
     console.error("Error creating product:", error);
-    return NextResponse.json({ error: "Failed to create product" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to create product" },
+      { status: 500 }
+    );
   }
 }
