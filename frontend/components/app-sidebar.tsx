@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/sidebar";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "./ui/button";
+import { AnimatedShinyText } from "./ui/shiny-text";
 
 const userData = {
   user: {
@@ -203,11 +204,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">Grub</span>
+                  <AnimatedShinyText className="flex w-full h-full pl-100em">
                   <span className="truncate text-xs text-muted-foreground/70">
                     {currentPortal === "business"
                       ? "Business Portal"
                       : "Food Rescue"}
                   </span>
+                  </AnimatedShinyText>
+
                 </div>
               </a>
             </SidebarMenuButton>
