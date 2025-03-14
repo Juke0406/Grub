@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
   Card,
@@ -22,6 +22,13 @@ const ResetPasswordPage: React.FC = () => {
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
   const router = useRouter();
+  const token = searchParams.get("token");
+
+  useEffect(() => {
+    if (!token) {
+      toast.error("Token is missing");
+    }
+  }, [token]);
 
   const handleOnSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

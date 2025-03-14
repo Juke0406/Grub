@@ -81,3 +81,9 @@ export const auth = betterAuth({
         }
     }
 } satisfies BetterAuthOptions);
+
+
+export async function getUser(req: Request) {
+    const session = await auth.api.getSession(req);
+    return session?.user || null;
+  }

@@ -6,9 +6,29 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { useMobile } from "@/hooks/use-mobile";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 
 export default function ProfileSettingsPage() {
   const isMobile = useMobile();
+  const [user, setUser] = useState({ name: "", email: "" });
+  // const router = useRouter();
+
+
+  useEffect(() => {
+    async function fetchUser() {
+      try {
+        const res = await fetch("/api/auth/user"); // Fetch user session
+        if (res.ok) {
+          const data = await res.json();
+          setUser(data); // Set user state
+        }
+      } catch (error) {
+        console.error("Failed to fetch user:", error);
+      }
+    }
+    fetchUser();
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen bg-muted">
@@ -20,11 +40,13 @@ export default function ProfileSettingsPage() {
             <div className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="name">Full Name</Label>
+                <Input id="name" value={user.name} readOnly />
                 <Input id="name" placeholder="Enter your full name" />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
+                <Input id="email" type="email" value={user.email} readOnly />
                 <Input id="email" type="email" placeholder="Enter your email" />
               </div>
 
