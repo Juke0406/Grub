@@ -21,7 +21,7 @@ export default function ProfileSettingsPage() {
         const res = await fetch("/api/auth/user"); // Fetch user session
         if (res.ok) {
           const data = await res.json();
-          setUser(data); // Set user state
+          setUser(data.user); // Set user state
         }
       } catch (error) {
         console.error("Failed to fetch user:", error);

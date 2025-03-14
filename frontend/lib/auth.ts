@@ -84,5 +84,5 @@ export const auth = betterAuth({
 
 export async function getUser(req: Request) {
     const session = await auth.api.getSession(req);
-    return session?.user || null;
+    return session || null;
 }
