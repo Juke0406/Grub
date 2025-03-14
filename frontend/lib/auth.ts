@@ -1,5 +1,5 @@
 import { betterAuth, BetterAuthOptions } from "better-auth";
-import { MongoClient } from "mongodb";
+import { getDatabase } from "./mongodb";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { VerificationEmail, VerificationChangeEmail, ForgetPasswordEmail } from "@/components/email-template";
 import nodemailer from "nodemailer";
@@ -11,8 +11,7 @@ const transporter = nodemailer.createTransport({
         pass: process.env.EMAIL_PASS
     }
 });
-const client = new MongoClient(process.env.DATABASE_URL || "");
-const db = client.db(process.env.DATABASE_NAME);
+const db = await getDatabase(process.env.DEFAULT_DATABASE);
 
 export const auth = betterAuth({
     database: mongodbAdapter(db),
@@ -86,4 +85,4 @@ export const auth = betterAuth({
 export async function getUser(req: Request) {
     const session = await auth.api.getSession(req);
     return session?.user || null;
-  }
+}
