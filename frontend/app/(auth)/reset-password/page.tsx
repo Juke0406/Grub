@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
 
-const ResetPasswordPage: React.FC = () => {
+export default function ResetPasswordPage() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -124,6 +124,4 @@ const ResetPasswordPage: React.FC = () => {
       </Card>
     </div>
   );
-};
-
-export default ResetPasswordPage;
+}

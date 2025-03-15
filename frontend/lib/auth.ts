@@ -26,12 +26,12 @@ export const auth = betterAuth({
     user: {
         changeEmail: {
             enabled: true,
-            sendChangeEmailVerification: async ({ newEmail, url }) => {
+            sendChangeEmailVerification: async ({ user, newEmail, url, token }) => {
                 const mailOptions = {
                     from: process.env.EMAIL_USER,
-                    to: newEmail,
-                    subject: "Verify your new email address",
-                    html: VerificationChangeEmail({ username: "", uri: url })
+                    to: user.email,
+                    subject: "Change your email address",
+                    html: VerificationChangeEmail({ username: user.name, uri: url })
                 }
                 try {
                     await transporter.sendMail(mailOptions);
@@ -80,9 +80,3 @@ export const auth = betterAuth({
         }
     }
 } satisfies BetterAuthOptions);
-
-
-export async function getUser(req: Request) {
-    const session = await auth.api.getSession(req);
-    return session || null;
-}

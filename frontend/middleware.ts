@@ -31,7 +31,7 @@ export async function middleware(request: NextRequest) {
     const sessionCookie = getSessionCookie(request);
     
     if (!sessionCookie) {
-        if (path === "/login" || path === "/signup" || path === "/" || path === "/forget-password" || path === "/reset-password" || path === "/email-verified") {
+        if (path === "/login" || path === "/signup" || path === "/" || path === "/forget-password" || path === "/reset-password" || path === "/email-verified" || path === "/change-email") {
             return NextResponse.next();
         }
         return NextResponse.redirect(new URL("/login", request.url));

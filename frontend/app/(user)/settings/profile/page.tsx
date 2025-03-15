@@ -7,28 +7,47 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { useMobile } from "@/hooks/use-mobile";
 import { useEffect, useState } from "react";
+import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/router";
+import { LoaderCircle } from "lucide-react";
+import { toast } from "sonner";
 
 export default function ProfileSettingsPage() {
   const isMobile = useMobile();
   const [user, setUser] = useState({ name: "", email: "" });
+  const [newEmail, setNewEmail] = useState("");
+  const [newName, setNewName] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   // const router = useRouter();
-
 
   useEffect(() => {
     async function fetchUser() {
       try {
-        const res = await fetch("/api/auth/user"); // Fetch user session
-        if (res.ok) {
-          const data = await res.json();
-          setUser(data.user); // Set user state
-        }
-      } catch (error) {
-        console.error("Failed to fetch user:", error);
+        const { data: session } = await authClient.getSession();
+        setUser({
+          name: session?.user?.name || "",
+          email: session?.user?.email || "",
+        });
+      } catch {
+        console.error("Failed to fetch user");
       }
     }
     fetchUser();
   }, []);
+
+  const handleOnSubmit = async () => {
+    setIsLoading(true);
+    try {
+      await authClient.changeEmail({
+        newEmail: newEmail,
+        callbackURL: "/change-email",
+      });
+    } catch (error) {
+      setIsLoading(false);
+      toast.error("Error changing email");
+    }
+    setIsLoading(false);
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-muted">
@@ -41,13 +60,26 @@ export default function ProfileSettingsPage() {
               <div className="space-y-2">
                 <Label htmlFor="name">Full Name</Label>
                 <Input id="name" value={user.name} readOnly />
-                <Input id="name" placeholder="Enter your full name" />
+                <Input
+                  id="name"
+                  placeholder="Enter your full name"
+                  onChange={(e) => {
+                    setNewName(e.target.value);
+                  }}
+                />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input id="email" type="email" value={user.email} readOnly />
-                <Input id="email" type="email" placeholder="Enter your email" />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="Enter your email"
+                  onChange={(e) => {
+                    setNewEmail(e.target.value);
+                  }}
+                />
               </div>
 
               <div className="space-y-2">
@@ -87,7 +119,16 @@ export default function ProfileSettingsPage() {
 
               <Separator />
 
-              <Button className="w-full">Save Changes</Button>
+              {isLoading ? (
+                <div className="flex items-center justify-center gap-2">
+                  <LoaderCircle className="animate-spin" />
+                  <span>Loading...</span>
+                </div>
+              ) : (
+                <Button className="w-full" onClick={handleOnSubmit}>
+                  Save Changes
+                </Button>
+              )}
             </div>
           </div>
         </div>

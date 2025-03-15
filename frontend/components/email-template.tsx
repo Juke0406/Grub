@@ -57,7 +57,7 @@ export const VerificationChangeEmail: React.FC<
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Verify Your New Email Address</title>
+            <title>Change Email Address</title>
         </head>
         <body style="font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #ffffff;">
             <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #ffffff;">
@@ -65,19 +65,19 @@ export const VerificationChangeEmail: React.FC<
                     <td>
                         <div style="max-width: 600px; margin: 30px auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                             <div style="background-color: #ffffff; padding: 40px 30px 20px 30px; text-align: center;">
-                                <h1 style="margin-top: 0; margin-bottom: 10px; font-size: 24px; color: #333333;">Verify Your New Email Address</h1>
+                                <h1 style="margin-top: 0; margin-bottom: 10px; font-size: 24px; color: #333333;">Hi ${username}!</h1>
                                 <p style="margin-top: 0; margin-bottom: 20px; color: #777777; font-size: 16px; line-height: 1.4;">
-                                    Please verify your new email address by clicking the button below.
+                                    You recently requested to change your email address. Click the button below to proceed.
                                 </p>
                             </div>
                             <div style="padding: 30px 30px 20px 30px; text-align: center;">
                                 <a href="${uri}" style="display: inline-block; padding: 14px 28px; background-color: #28a745; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 18px;">
-                                    Verify Email
+                                    Yes, Change My Email
                                 </a>
                             </div>
                             <div style="padding: 20px 30px 30px 30px; text-align: center;">
                                 <p style="margin-top: 0; margin-bottom: 20px; color: #777777; font-size: 14px; line-height: 1.4;">
-                                    Clicking the button will update your account with this new email address.
+                                    If you didn't request to change email, you can ignore this email. Your email will remain unchanged.
                                 </p>
                             </div>
                         </div>
