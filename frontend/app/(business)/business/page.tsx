@@ -380,6 +380,9 @@ import {
 } from "@/services/api-service";
 
 import { authClient } from "@/lib/auth-client";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { coy } from "react-syntax-highlighter/dist/esm/styles/prism";
+
 
 const usageData = {
   currentMonth: {
@@ -395,51 +398,89 @@ const usageData = {
     { month: "Oct", requests: 15234 },
   ],
 };
-
 const sampleCode = {
-  curl: `curl -X POST ${process.env.NEXT_PUBLIC_API_URL}/v1/check-image \\
+  curl: `# Get inventory for your food stall
+curl -X GET ${process.env.NEXT_PUBLIC_API_URL}/v1/inventory \\
+  -H "Authorization: Bearer YOUR_API_KEY"
+
+# Add a new food item to your inventory
+curl -X POST ${process.env.NEXT_PUBLIC_API_URL}/v1/inventory \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
-    "image_url": "https://example.com/image.jpg"
+    "item_name": "Fried Rice",
+    "quantity": 50,
+    "price": 5.99
+  }'
+
+# Remove a food item
+curl -X DELETE ${process.env.NEXT_PUBLIC_API_URL}/v1/inventory \\
+  -H "Authorization: Bearer YOUR_API_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "item_id": "ITEM_ID"
   }'`,
+
   python: `import requests
 
-response = requests.post(
-    '${process.env.NEXT_PUBLIC_API_URL}/v1/check-image',
-    headers={
-        'Authorization': 'Bearer YOUR_API_KEY',
-        'Content-Type': 'application/json'
-    },
-    json={
-        'image_url': 'https://example.com/image.jpg'
-    }
-)
+headers = {
+    'Authorization': 'Bearer YOUR_API_KEY',
+    'Content-Type': 'application/json'
+}
 
-result = response.json()
-print(result)`,
+# Get inventory
+get_response = requests.get('${process.env.NEXT_PUBLIC_API_URL}/v1/inventory', headers=headers)
+print("Inventory:", get_response.json())
+
+# Add new item
+add_response = requests.post('${process.env.NEXT_PUBLIC_API_URL}/v1/inventory', headers=headers, json={
+    'item_name': 'Fried Rice',
+    'quantity': 50,
+    'price': 5.99
+})
+print("Add Item Response:", add_response.json())
+
+# Remove item
+delete_response = requests.delete('${process.env.NEXT_PUBLIC_API_URL}/v1/inventory', headers=headers, json={
+    'item_id': 'ITEM_ID'
+})
+print("Delete Item Response:", delete_response.json())`,
+
   node: `const axios = require('axios');
 
-const checkImage = async () => {
-  try {
-    const response = await axios.post(
-      '${process.env.NEXT_PUBLIC_API_URL}/v1/check-image',
-      {
-        image_url: 'https://example.com/image.jpg'
-      },
-      {
-        headers: {
-          'Authorization': 'Bearer YOUR_API_KEY',
-          'Content-Type': 'application/json'
-        }
-      }
-    );
-    
-    console.log(response.data);
-  } catch (error) {
-    console.error(error);
-  }
-}`,
+const headers = {
+  'Authorization': 'Bearer YOUR_API_KEY',
+  'Content-Type': 'application/json'
+};
+
+// Get inventory
+const getInventory = async () => {
+  const res = await axios.get('${process.env.NEXT_PUBLIC_API_URL}/v1/inventory', { headers });
+  console.log("Inventory:", res.data);
+};
+
+// Add item
+const addItem = async () => {
+  const res = await axios.post('${process.env.NEXT_PUBLIC_API_URL}/v1/inventory', {
+    item_name: 'Fried Rice',
+    quantity: 50,
+    price: 5.99
+  }, { headers });
+  console.log("Added Item:", res.data);
+};
+
+// Delete item
+const deleteItem = async () => {
+  const res = await axios.delete('${process.env.NEXT_PUBLIC_API_URL}/v1/inventory', {
+    headers,
+    data: { item_id: 'ITEM_ID' }
+  });
+  console.log("Deleted Item:", res.data);
+};
+
+getInventory();
+addItem();
+deleteItem();`,
 };
 
 const REQUEST_COST = 0.005; // cost per request in USD
@@ -511,7 +552,7 @@ export default function BusinessDashboard() {
       ]);
       setShowSuccess(true); // Show success message
       setTimeout(() => setShowSuccess(false), 3000); // Hide success message after 3 seconds
-  
+
     } catch (error) {
       console.error("Error creating API key:", error);
     } finally {
@@ -707,22 +748,22 @@ export default function BusinessDashboard() {
           </CardContent>
         </Card>
         {creatingKey && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="bg-white p-6 rounded shadow-lg flex flex-col items-center gap-2">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
-            <p>Generating API key...</p>
+          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+            <div className="bg-white p-6 rounded shadow-lg flex flex-col items-center gap-2">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
+              <p>Generating API key...</p>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {showSuccess && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/80 bg-opacity-50 z-50">
-          <div className="bg-white p-6 rounded shadow-lg flex flex-col items-center gap-2">
-            <p>API key created successfully!</p>
-            <Button onClick={() => setShowSuccess(false)}>Close</Button>
+        {showSuccess && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black/80 bg-opacity-50 z-50">
+            <div className="bg-white p-6 rounded shadow-lg flex flex-col items-center gap-2">
+              <p>API key created successfully!</p>
+              <Button onClick={() => setShowSuccess(false)}>Close</Button>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
 
         <Card>
@@ -750,14 +791,34 @@ export default function BusinessDashboard() {
                   <TabsTrigger value="node">Node.js</TabsTrigger>
                 </TabsList>
                 <TabsContent value="curl">
-                  <CodeBlock code={sampleCode.curl} language="bash" />
+                  <SyntaxHighlighter language="bash" style={coy}>
+                    {sampleCode.curl}
+                  </SyntaxHighlighter>
                 </TabsContent>
                 <TabsContent value="python">
-                  <CodeBlock code={sampleCode.python} language="python" />
+                  <SyntaxHighlighter language="python" style={coy}>
+                    {sampleCode.python}
+                  </SyntaxHighlighter>
                 </TabsContent>
                 <TabsContent value="node">
-                  <CodeBlock code={sampleCode.node} language="javascript" />
+                  <SyntaxHighlighter language="javascript" style={coy}>
+                    {sampleCode.node}
+                  </SyntaxHighlighter>
                 </TabsContent>
+                {/* <TabsList>
+                    <TabsTrigger value="curl">cURL</TabsTrigger>
+                    <TabsTrigger value="python">Python</TabsTrigger>
+                    <TabsTrigger value="node">Node.js</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="curl">
+                    <CodeBlock code={sampleCode.curl} language="bash" />
+                  </TabsContent>
+                  <TabsContent value="python">
+                    <CodeBlock code={sampleCode.python} language="python" />
+                  </TabsContent>
+                  <TabsContent value="node">
+                    <CodeBlock code={sampleCode.node} language="javascript" />
+                  </TabsContent> */}
               </Tabs>
             </div>
           </CardContent>
