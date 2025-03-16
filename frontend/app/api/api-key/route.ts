@@ -75,14 +75,19 @@ export async function POST(req: Request) {
         ? new Date(expiresAt)
         : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // Default 30 days
       usageCount: 0,
+      created_at: new Date(), // Mongo recommended pattern!
     };
 
     const result = await db.collection("api_keys").insertOne(newKey);
 
     return NextResponse.json({
-      apiKey,
+      key:apiKey,
       expiresAt: newKey.expiresAt,
       id: result.insertedId,
+      message: "API key created",
+      usageCount: newKey.usageCount,
+      created_at: newKey.created_at,
+      
     });
   } catch (error) {
     console.log(error);
