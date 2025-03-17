@@ -5,8 +5,9 @@ import { FoodItemCard } from "@/components/food-item-card";
 import { SearchHeader } from "@/components/search-header";
 import { useMobile } from "@/hooks/use-mobile";
 import data from "@/lib/data.json";
+import { set } from "better-auth";
 import { Beef, Coffee, Pizza, ShoppingBag, Soup } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const categories = [
   { id: "all", name: "All Items", icon: <ShoppingBag className="h-4 w-4" /> },
@@ -32,8 +33,8 @@ const transformedItems = [
       category: item.name.toLowerCase().includes("mystery")
         ? "mystery"
         : item.name.toLowerCase().includes("bread")
-        ? "bread"
-        : "pastries",
+          ? "bread"
+          : "pastries",
       originalPrice: item.originalPrice,
       discountedPrice: item.discountedPrice,
       image: item.image,
@@ -61,16 +62,48 @@ const transformedItems = [
   ),
 ];
 
-type SortOption = "nearest" | "bestDeals" | "rating";
+
 
 export default function BrowseAllPage() {
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch("/api/products");
+        const data = await response.json();
+        const transformed = data.products.map((product: any) => ({
+          id: product._id,
+          name: product.name,
+          shop: product.userID,
+          type: product.category, // assuming "type" = category
+          category: product.category,
+          originalPrice: product.originalPrice,
+          discountedPrice: product.discountedPrice,
+          image: product.imageUrl,
+          distance: Math.random() * 5, // you can replace this with real geo logic later
+          rating: Math.floor(Math.random() * 5) + 1, // mock rating, replace with real data when ready
+          availableUntil: product.inventory.expirationDate,
+          quantity: product.inventory.quantity,
+        }));
+        setItems(transformed);
+        console.log(transformed);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
+  
+    fetchData();
+  }, []);
+  
+
   const [activeCategory, setActiveCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortBy, setSortBy] = useState<SortOption>("nearest");
+  const [sortBy, setSortBy] = useState("");
   const isMobile = useMobile();
+  const [items, setItems] = useState<Item[]>([]);
 
   // Filter items based on category and search query
-  const filteredItems = transformedItems.filter((item) => {
+  // const filteredItems = transformedItems.filter((item) => {
+  const filteredItems = items.filter((item) => {
     const matchesCategory =
       activeCategory === "all" || item.category === activeCategory;
     const matchesSearch =
@@ -106,7 +139,7 @@ export default function BrowseAllPage() {
           placeholder="Search for food items..."
           onSearch={setSearchQuery}
           onSort={setSortBy}
-          sortBy={sortBy}
+        // sortBy={sortBy}
         />
         <div className={isMobile ? "px-4" : "px-8 py-2"}>
           <CategoryFilter
@@ -118,7 +151,7 @@ export default function BrowseAllPage() {
       </div>
 
       {/* Main Content */}
-      <div className={isMobile ? "px-4" : "px-8"}>
+      {/* <div className={isMobile ? "px-4" : "px-8"}>
         <div className="max-w-[1600px] mx-auto">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {sortedItems.map((item) => (
@@ -128,6 +161,35 @@ export default function BrowseAllPage() {
                 distance={`${item.distance} km`}
               />
             ))}
+          </div>
+        </div>
+      </div> */}
+
+
+      {/* Main Content */}
+      <div className={isMobile ? "px-4" : "px-8"}>
+        <div className="max-w-[1600px] mx-auto">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {/* {sortedItems.map((item) => (
+              <FoodItemCard
+                key={item.id}
+                {...item}
+                distance={`${item.distance} km`}
+              />  
+            ))} */}
+            {sortedItems.map((item) => (
+              <FoodItemCard
+                key={item.id}
+                name={item.name}
+                shop={item.shop}
+                originalPrice={item.originalPrice}
+                discountedPrice={item.discountedPrice}
+                image={item.image}
+                availableUntil={item.availableUntil}
+                quantity={item.quantity}            
+              />
+            ))}
+
           </div>
         </div>
       </div>
