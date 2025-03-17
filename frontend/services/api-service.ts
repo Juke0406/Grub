@@ -5,16 +5,11 @@ export interface APIKey {
   key: string;
   created_at: string;
   last_used: string | null;
-  usage_count?: number;
+  usageCount?: number;
   expires_at?: string; 
   monthly_cost?: string;
 }
 
-
-// export interface CreateApiKeyResponse {
-//     message: string;
-//     key: string;
-// }
 export interface CreateApiKeyResponse {
   message: string;
   key: string;
@@ -100,4 +95,6 @@ export async function getApiKeys(userId: string) {
   const data: APIKey[] = await response.json();
   return data;
 }
+
+
 

@@ -118,6 +118,10 @@ const businessNavigation = [
     isActive: true,
     items: [
       {
+        title: "API Management",
+        url: "/business",
+      },
+      {
         title: "Inventory",
         url: "/business/inventory",
       },
@@ -129,6 +133,7 @@ const businessNavigation = [
         title: "Orders",
         url: "/business/orders",
       },
+
     ],
   },
   {
@@ -147,7 +152,7 @@ const businessNavigation = [
       },
       {
         title: "Reports",
-        url: "/business/analytics/reports",
+        url: "/business/analytics",
       },
     ],
   },
