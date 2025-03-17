@@ -577,7 +577,7 @@ deleteItem();`,
 };
 
 const REQUEST_COST = 0.05; // cost per request in USD
-const REQUEST_QUOTA = 20000; // Example quota
+const REQUEST_QUOTA = 100; // Example quota
 
 const Spinner = () => (
     <div className="bg-white w-full h-full p-6 rounded shadow-lg flex flex-col justify-center items-center gap-3">
