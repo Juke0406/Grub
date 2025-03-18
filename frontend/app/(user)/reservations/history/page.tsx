@@ -10,6 +10,7 @@ import { ReservationCard } from "@/components/reservation/reservation-card";
 import { ReservationSkeleton } from "@/components/reservation/reservation-skeleton";
 import { useReservations } from "@/hooks/use-reservations";
 import { redirect } from "next/navigation";
+import { CancelledReservationCard } from "@/components/reservation/reservation-cancelled-card";
 
 export default function HistoryPage() {
   const isMobile = useMobile();
@@ -40,8 +41,8 @@ export default function HistoryPage() {
             ) : reservations.length > 0 ? (
               // Show reservations if available
               reservations.map((reservation) => (
-                <ReservationCard
-                  key={reservation.id}
+                <CancelledReservationCard
+                  key={reservation._id}
                   reservation={reservation}
                 />
               ))
