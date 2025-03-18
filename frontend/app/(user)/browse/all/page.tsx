@@ -179,7 +179,7 @@ export default function BrowseAllPage() {
             ))} */}
             {sortedItems.map((item) => (
               <FoodItemCard
-                key={item.id}
+                id={item.id}
                 name={item.name}
                 shop={item.shop}
                 originalPrice={item.originalPrice}

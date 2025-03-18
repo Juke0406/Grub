@@ -46,6 +46,7 @@ export function useReservations({
         }
 
         const data = await response.json();
+        console.log("Reservation data:", data);
         setReservations(data.reservations);
         setPagination(data.pagination);
       } catch (err) {

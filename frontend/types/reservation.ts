@@ -1,5 +1,5 @@
 export interface Reservation {
-  id: string;
+  _id: string;
   userId: string;
   storeName: string;
   storeLocation: string;

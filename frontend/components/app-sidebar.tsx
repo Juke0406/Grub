@@ -142,14 +142,14 @@ const businessNavigation = [
     icon: BarChart3,
     isActive: true,
     items: [
-      {
-        title: "Sales",
-        url: "/business/analytics/sales",
-      },
-      {
-        title: "Trends",
-        url: "/business/analytics/trends",
-      },
+      // {
+      //   title: "Sales",
+      //   url: "/business/analytics/sales",
+      // },
+      // {
+      //   title: "Trends",
+      //   url: "/business/analytics/trends",
+      // },
       {
         title: "Reports",
         url: "/business/analytics",

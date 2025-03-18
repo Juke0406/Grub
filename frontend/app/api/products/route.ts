@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { getDatabase } from "@/lib/mongodb";
+import { ObjectId } from "mongodb";
 
 export async function GET(request: NextRequest) {
   try {
@@ -194,3 +195,39 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+export async function PATCH(request: NextRequest) {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session || !session.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { productId, quantityReserved } = await request.json();
+
+    if (!productId || !quantityReserved) {
+      return NextResponse.json({ error: "Missing productId or quantityReserved" }, { status: 400 });
+    }
+
+    const db = await getDatabase();
+    const productsCollection = db.collection("products");
+
+    const result = await productsCollection.updateOne(
+      { _id: new ObjectId(productId) },
+      { $inc: { "inventory.quantity": -quantityReserved } }
+    );
+
+    if (result.modifiedCount === 1) {
+      return NextResponse.json({ message: "Stock updated successfully" });
+    } else {
+      return NextResponse.json({ error: "Product not found or stock update failed" }, { status: 404 });
+    }
+  } catch (error) {
+    console.error("Error updating stock:", error);
+    return NextResponse.json({ error: "Failed to update stock" }, { status: 500 });
+  }
+}
+

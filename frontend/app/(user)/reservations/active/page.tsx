@@ -10,6 +10,7 @@ import { CheckCircle2, Clock, MapPin } from "lucide-react";
 import { Reservation, STATUS_BADGES } from "@/types/reservation";
 import { ReservationCard } from "@/components/reservation/reservation-card";
 import { ReservationSkeleton } from "@/components/reservation/reservation-skeleton";
+import { useEffect, useState } from "react";
 import { redirect } from "next/navigation";
 
 export default function ActiveReservationsPage() {
@@ -17,6 +18,16 @@ export default function ActiveReservationsPage() {
   const { reservations, isLoading, error } = useReservations({
     status: "pending,confirmed,ready",
   });
+  const [localReservations, setLocalReservations] = useState<Reservation[]>(reservations);
+
+  // Keep local state in sync with the hook data
+  useEffect(() => {
+    setLocalReservations(reservations);
+  }, [reservations]);
+
+  const handleDelete = (id: string) => {
+    setLocalReservations((prev) => prev.filter((r) => r._id !== id));
+  };
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -42,8 +53,9 @@ export default function ActiveReservationsPage() {
               // Show reservations if available
               reservations.map((reservation) => (
                 <ReservationCard
-                  key={reservation.id}
+                  key={reservation._id}
                   reservation={reservation}
+                  onDelete={() => handleDelete(reservation._id)}
                 />
               ))
             ) : (
