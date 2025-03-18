@@ -78,6 +78,66 @@ def demo_action():
             "category": "Meat",
             "userID": "user-test",
             "expirationDate": (datetime.now() + timedelta(days=4)).strftime('%Y-%m-%d')
+        },
+        {
+            "SKU": "006",
+            "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTQ6Fk1w0Gv-NZmfDmr3GrdZFysq832JJnTdA&s",
+            "name": "Pasta",
+            "originalPrice": 1.99,
+            "discountedPrice": 1.49,
+            "quantity": 30,
+            "description": "1 lb of pasta",
+            "category": "Cooking",
+            "userID": "user-test",
+            "expirationDate": (datetime.now() + timedelta(days=2)).strftime('%Y-%m-%d')
+        },
+        {
+            "SKU": "007",
+            "imageUrl": "https://m.media-amazon.com/images/I/81SwbUNiUQL._AC_UF1000,1000_QL80_.jpg",
+            "name": "Tomato Sauce",
+            "originalPrice": 2.49,
+            "discountedPrice": 1.99,
+            "quantity": 10,
+            "description": "Jar of tomato sauce",
+            "category": "Cooking",
+            "userID": "user-test",
+            "expirationDate": (datetime.now() + timedelta(days=6)).strftime('%Y-%m-%d')
+        },
+        {
+            "SKU": "008",
+            "imageUrl": "https://m.media-amazon.com/images/I/81Ml0P+qqnL.jpg",
+            "name": "Toilet Paper",
+            "originalPrice": 6.99,
+            "discountedPrice": 5.99,
+            "quantity": 25,
+            "description": "12-pack of toilet paper",
+            "category": "Household",
+            "userID": "user-test",
+            "expirationDate": (datetime.now() + timedelta(days=7)).strftime('%Y-%m-%d')
+        },
+        {
+            "SKU": "009",
+            "imageUrl": "https://m.media-amazon.com/images/I/81BleDYuugL.jpg",
+            "name": "Hand Soap",
+            "originalPrice": 3.49,
+            "discountedPrice": 2.99,
+            "quantity": 15,
+            "description": "8 oz bottle of hand soap",
+            "category": "Household",
+            "userID": "user-test",
+            "expirationDate": (datetime.now() + timedelta(days=5)).strftime('%Y-%m-%d')
+        },
+        {
+            "SKU": "010",
+            "imageUrl": "https://www.slhfreshfruits.sg/cdn/shop/products/76.png?v=1661949183",
+            "name": "Apples (each)",
+            "originalPrice": 2.49,
+            "discountedPrice": 1.99,
+            "quantity": 200,
+            "description": "Freshest apples from the orchard",
+            "category": "Produce",
+            "userID": "user-test",
+            "expirationDate": (datetime.now() + timedelta(days=5)).strftime('%Y-%m-%d')
         }
     ]
 
