@@ -8,7 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { useMobile } from "@/hooks/use-mobile";
 import { useEffect, useState } from "react";
 import { authClient } from "@/lib/auth-client";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
 
@@ -17,8 +17,9 @@ export default function ProfileSettingsPage() {
   const [user, setUser] = useState({ name: "", email: "" });
   const [newEmail, setNewEmail] = useState("");
   const [newName, setNewName] = useState("");
+  const [newPhone, setNewPhone] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  // const router = useRouter();
+  const router = useRouter();
 
   useEffect(() => {
     async function fetchUser() {
@@ -36,17 +37,48 @@ export default function ProfileSettingsPage() {
   }, []);
 
   const handleOnSubmit = async () => {
-    setIsLoading(true);
-    try {
-      await authClient.changeEmail({
-        newEmail: newEmail,
-        callbackURL: "/change-email",
-      });
-    } catch (error) {
+    if (newEmail) {
+      setIsLoading(true);
+      try {
+        await authClient.changeEmail({
+          newEmail: newEmail,
+          callbackURL: "/change-email",
+        });
+      } catch (error) {
+        setIsLoading(false);
+        toast.error("Error changing email");
+      }
       setIsLoading(false);
-      toast.error("Error changing email");
+      toast.success("Profile updated successfully");
+    } else if (newName) {
+      setIsLoading(true);
+      try {
+        await authClient.updateUser({
+          name: newName,
+        });
+      } catch (error) {
+        setIsLoading(false);
+        toast.error("Error updating profile");
+      }
+      window.location.reload();
+      setIsLoading(false);
+      toast.success("Profile updated successfully");
+    } else if (newPhone) {
+      setIsLoading(true);
+      try {
+        await authClient.updateUser({
+          phone: newPhone,
+        });
+      } catch (error) {
+        setIsLoading(false);
+        toast.error("Error updating profile");
+      }
+      window.location.reload();
+      setIsLoading(false);
+      toast.success("Profile updated successfully");
+    } else {
+      toast.error("No changes made");
     }
-    setIsLoading(false);
   };
 
   return (
@@ -88,6 +120,9 @@ export default function ProfileSettingsPage() {
                   id="phone"
                   type="tel"
                   placeholder="Enter your phone number"
+                  onChange={(e) => {
+                    setNewPhone(e.target.value);
+                  }}
                 />
               </div>
 
