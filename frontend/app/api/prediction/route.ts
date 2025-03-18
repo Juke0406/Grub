@@ -1,35 +1,40 @@
 // app/api/predictions/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { getDatabase } from "@/lib/mongodb";
+import { ObjectId } from "mongodb";
 
 export async function GET(req: NextRequest) {
   try {
-    // Get the database using your helper function.
     const db = await getDatabase();
     if (!db) {
       return NextResponse.json({ error: "Database connection failed" }, { status: 500 });
     }
-    
+
     const productsCollection = db.collection("products");
 
     // Fetch all products.
     const products = await productsCollection.find({}).toArray();
 
-    // Define a base threshold value.
-    // In a real-world scenario, you might compute this dynamically.
+    // Define a base threshold.
     const threshold = 10;
 
     // Build predictions based on current inventory levels.
     const predictions = products.reduce((acc: any[], product) => {
       const currentQuantity = product.inventory?.quantity || 0;
       if (currentQuantity > threshold) {
-        // Calculate the excess amount over the threshold.
         const excess = currentQuantity - threshold;
-        // Compute a simple reduction percentage as an example:
         const reductionPercent = Math.min(100, Math.round((excess / currentQuantity) * 100));
+        
+        // Format createdAt date for display.
+        const createdAtFormatted = product.createdAt 
+          ? new Date(product.createdAt).toLocaleDateString()
+          : "N/A";
+
         acc.push({
+          _id: product._id instanceof ObjectId ? product._id.toString() : product._id,
           SKU: product.SKU,
-          name: product.name,
+          // Combine the product name and its createdAt date.
+          name: `${product.name} (${createdAtFormatted})`,
           currentQuantity,
           recommendation: `Reduce import quantity by ${reductionPercent}%`,
         });

@@ -14,10 +14,12 @@ import {
 } from "recharts";
 
 interface Prediction {
+  _id: string;
   SKU: string;
   name: string;
   currentQuantity: number;
   recommendation: string;
+  createdAt?: string;
 }
 
 export default function AnalyticsPage() {
@@ -122,10 +124,10 @@ export default function AnalyticsPage() {
                   {/* We'll rely on our custom legend for color explanation */}
                   <Legend content={() => null} />
                   <Bar dataKey="currentQuantity" name="Current Quantity">
-                    {predictions.map((entry) => (
+                    {predictions.map((item) => (
                       <Cell
-                        key={entry.SKU}
-                        fill={getBarColor(entry.currentQuantity, threshold)}
+                        key={`${item.SKU}-${item.createdAt}`}
+                        fill={getBarColor(item.currentQuantity, threshold)}
                       />
                     ))}
                   </Bar>
@@ -153,7 +155,7 @@ export default function AnalyticsPage() {
                 <tbody>
                   {predictions.map((item, index) => (
                     <tr
-                      key={item.SKU}
+                      key={item._id}
                       className={index % 2 === 0 ? "bg-gray-50" : ""}
                     >
                       <td className="px-4 py-2 border-b text-gray-700">
