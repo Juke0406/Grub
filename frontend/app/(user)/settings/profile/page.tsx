@@ -28,6 +28,7 @@ export default function ProfileSettingsPage() {
         setUser({
           name: session?.user?.name || "",
           email: session?.user?.email || "",
+          phoneNumber: session?.user?.phoneNumber || "",
         });
       } catch {
         console.error("Failed to fetch user");
@@ -67,7 +68,7 @@ export default function ProfileSettingsPage() {
       setIsLoading(true);
       try {
         await authClient.updateUser({
-          phone: newPhone,
+          phoneNumber: newPhone,
         });
       } catch (error) {
         setIsLoading(false);
@@ -116,6 +117,7 @@ export default function ProfileSettingsPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="phone">Phone Number</Label>
+                <Input id="phone" value={user.phoneNumber} readOnly />
                 <Input
                   id="phone"
                   type="tel"
