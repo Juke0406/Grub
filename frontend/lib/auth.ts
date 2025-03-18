@@ -24,6 +24,14 @@ export const auth = betterAuth({
         }
     },
     user: {
+        additionalFields: {
+            rating: {
+                type: "number",
+                required: true,
+                defaultValue: 100,
+                input: false
+            }
+        },
         changeEmail: {
             enabled: true,
             sendChangeEmailVerification: async ({ user, newEmail, url, token }) => {
