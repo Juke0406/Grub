@@ -5,10 +5,8 @@ import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
 // GET a single product
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -50,10 +48,8 @@ export async function GET(
 }
 
 // PUT (Update) a product
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -148,10 +144,8 @@ export async function PUT(
 }
 
 // DELETE a product
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const session = await auth.api.getSession({
       headers: await headers(),

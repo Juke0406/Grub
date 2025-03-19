@@ -4,12 +4,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Clock, MapPin, Phone } from "lucide-react";
 
 interface SupermarketParams {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
-export default function SupermarketPage({ params }: SupermarketParams) {
+export default async function SupermarketPage(props: SupermarketParams) {
+  const params = await props.params;
   // In a real app, fetch supermarket data using params.id
   const mockSupermarket = {
     id: params.id,

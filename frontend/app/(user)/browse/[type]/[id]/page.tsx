@@ -4,7 +4,7 @@ import { FoodItemCard } from "@/components/food-item-card";
 import { Spinner } from "@/components/spinner";
 import { StoreHeader } from "@/components/store-header";
 import { Store } from "@/types/store";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, use } from "react";
 
 interface StoreDetails {
   store: Store & {
@@ -22,11 +22,12 @@ interface StoreDetails {
   }[];
 }
 
-export default function StorePage({
-  params,
-}: {
-  params: { id: string; type: string };
-}) {
+export default function StorePage(
+  props: {
+    params: Promise<{ id: string; type: string }>;
+  }
+) {
+  const params = use(props.params);
   const [data, setData] = useState<StoreDetails | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 

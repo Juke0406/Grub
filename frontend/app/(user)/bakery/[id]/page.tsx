@@ -3,12 +3,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Clock, MapPin, Phone, Star } from "lucide-react";
 
 interface BakeryParams {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
-export default function BakeryPage({ params }: BakeryParams) {
+export default async function BakeryPage(props: BakeryParams) {
+  const params = await props.params;
   // In a real app, fetch bakery data using params.id
   const mockBakery = {
     id: params.id,

@@ -4,12 +4,13 @@ import { Separator } from "@/components/ui/separator";
 import { CalendarIcon, Clock, MapPin, Tag } from "lucide-react";
 
 interface FoodItemParams {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
-export default function FoodItemPage({ params }: FoodItemParams) {
+export default async function FoodItemPage(props: FoodItemParams) {
+  const params = await props.params;
   // In a real app, fetch item data using params.id
   const mockItem = {
     id: params.id,
