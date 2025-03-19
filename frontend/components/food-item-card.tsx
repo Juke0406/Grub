@@ -1,12 +1,16 @@
-
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Clock } from "lucide-react";
-import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { CheckCircle, Loader2 } from "lucide-react";
+import { CheckCircle, Clock, Loader2 } from "lucide-react";
+import { useState } from "react";
 
 interface FoodItemProps {
   id: string;
@@ -28,7 +32,8 @@ export function FoodItemCard({
   image,
   availableUntil,
   quantity,
-}: FoodItemProps) {
+  onReservationComplete,
+}: FoodItemProps & { onReservationComplete?: () => void }) {
   const [open, setOpen] = useState(false);
   const [selectedQty, setSelectedQty] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
@@ -71,32 +76,42 @@ export function FoodItemCard({
     setIsLoading(true);
     try {
       // Step 1: Make reservation
-      await fetch('/api/reservation', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      await fetch("/api/reservation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           storeName: shop,
-          items: [{ name: name, quantity: selectedQty, originalPrice, discountPercentage: Math.round(100 - (discountedPrice / originalPrice) * 100) }],
+          items: [
+            {
+              name: name,
+              quantity: selectedQty,
+              originalPrice,
+              discountPercentage: Math.round(
+                100 - (discountedPrice / originalPrice) * 100
+              ),
+            },
+          ],
           storeLocation: "placeholder-location",
           pickUpTime: "2025-03-11T14:00:00Z",
           pickUpEndTime: "2025-03-11T17:00:00Z",
         }),
       });
-  
+
       // Step 2: Decrement stock
-      await fetch('/api/products', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+      await fetch("/api/products", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           productId: id, // make sure you pass `id` as prop to FoodItemCard
           quantityReserved: selectedQty,
         }),
       });
-  
+
       setSuccess(true);
       setTimeout(() => {
         setOpen(false);
         setSuccess(false);
+        onReservationComplete?.();
       }, 1500);
     } catch (error) {
       console.error("Error:", error);
@@ -104,7 +119,6 @@ export function FoodItemCard({
       setIsLoading(false);
     }
   };
-  
 
   return (
     <>
@@ -129,9 +143,7 @@ export function FoodItemCard({
               <Clock className="w-4 h-4" />
               <span>{availableUntil}</span>
             </div>
-            <div>
-              Stock: {quantity}
-            </div>
+            <div>Stock: {quantity}</div>
           </div>
 
           <div className="flex justify-between items-center pt-1">
@@ -175,7 +187,11 @@ export function FoodItemCard({
             </div>
           </div>
           <DialogFooter>
-            <Button onClick={handleReserve} disabled={isLoading || success} className="w-full">
+            <Button
+              onClick={handleReserve}
+              disabled={isLoading || success}
+              className="w-full"
+            >
               {isLoading ? (
                 <Loader2 className="animate-spin w-4 h-4" />
               ) : success ? (

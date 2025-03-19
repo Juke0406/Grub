@@ -5,7 +5,6 @@ import { FoodItemCard } from "@/components/food-item-card";
 import { SearchHeader } from "@/components/search-header";
 import { useMobile } from "@/hooks/use-mobile";
 import data from "@/lib/data.json";
-import { set } from "better-auth";
 import { Beef, Coffee, Pizza, ShoppingBag, Soup } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -33,8 +32,8 @@ const transformedItems = [
       category: item.name.toLowerCase().includes("mystery")
         ? "mystery"
         : item.name.toLowerCase().includes("bread")
-          ? "bread"
-          : "pastries",
+        ? "bread"
+        : "pastries",
       originalPrice: item.originalPrice,
       discountedPrice: item.discountedPrice,
       image: item.image,
@@ -62,8 +61,6 @@ const transformedItems = [
   ),
 ];
 
-
-
 export default function BrowseAllPage() {
   useEffect(() => {
     const fetchData = async () => {
@@ -90,10 +87,9 @@ export default function BrowseAllPage() {
         console.error("Error fetching products:", error);
       }
     };
-  
+
     fetchData();
   }, []);
-  
 
   const [activeCategory, setActiveCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -139,7 +135,7 @@ export default function BrowseAllPage() {
           placeholder="Search for food items..."
           onSearch={setSearchQuery}
           onSort={setSortBy}
-        // sortBy={sortBy}
+          // sortBy={sortBy}
         />
         <div className={isMobile ? "px-4" : "px-8 py-2"}>
           <CategoryFilter
@@ -165,7 +161,6 @@ export default function BrowseAllPage() {
         </div>
       </div> */}
 
-
       {/* Main Content */}
       <div className={isMobile ? "px-4" : "px-8"}>
         <div className="max-w-[1600px] mx-auto">
@@ -179,6 +174,7 @@ export default function BrowseAllPage() {
             ))} */}
             {sortedItems.map((item) => (
               <FoodItemCard
+                key={item.id}
                 id={item.id}
                 name={item.name}
                 shop={item.shop}
@@ -186,10 +182,28 @@ export default function BrowseAllPage() {
                 discountedPrice={item.discountedPrice}
                 image={item.image}
                 availableUntil={item.availableUntil}
-                quantity={item.quantity}            
+                quantity={item.quantity}
+                onReservationComplete={async () => {
+                  const response = await fetch("/api/products");
+                  const data = await response.json();
+                  const transformed = data.products.map((product: any) => ({
+                    id: product._id,
+                    name: product.name,
+                    shop: product.userID,
+                    type: product.category,
+                    category: product.category,
+                    originalPrice: product.originalPrice,
+                    discountedPrice: product.discountedPrice,
+                    image: product.imageUrl,
+                    distance: Math.random() * 5,
+                    rating: Math.floor(Math.random() * 5) + 1,
+                    availableUntil: product.inventory.expirationDate,
+                    quantity: product.inventory.quantity,
+                  }));
+                  setItems(transformed);
+                }}
               />
             ))}
-
           </div>
         </div>
       </div>
