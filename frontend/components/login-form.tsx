@@ -58,7 +58,7 @@ export function LoginForm({
           <form onSubmit={handleSubmit} className="p-6 md:p-8">
             <div className="flex flex-col gap-6">
               <div className="flex flex-col items-center text-center">
-                <h1 className="text-2xl font-medium">Welcome Back</h1>
+                <h1 className="text-2xl font-medium">Grub</h1>
                 <p className="text-muted-foreground text-balance">
                   Login to your Grub account
                 </p>
@@ -78,7 +78,7 @@ export function LoginForm({
                   <Label htmlFor="password">Password</Label>
                   <a
                     href="forget-password"
-                    className="ml-auto text-sm underline-offset-2 hover:underline"
+                    className="ml-auto text-xs text-muted-foreground underline-offset-2 hover:underline"
                   >
                     Forgot your password?
                   </a>

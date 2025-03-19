@@ -7,8 +7,17 @@ export default function HomePage() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
-      <header className="relative bg-gradient-to-b from-green-500/90 to-emerald-600/90 text-white">
-        <div className="absolute inset-0 z-0 bg-emerald-600" />
+      <header className="relative text-white">
+        <div
+          className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage:
+              'url("https://images.unsplash.com/photo-1556742059-47b93231f536?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D")',
+          }}
+        >
+          <div className="absolute inset-0 bg-black/40" />{" "}
+          {/* Overlay for better text readability */}
+        </div>
         <div className="relative z-10 px-4 py-16 sm:px-6 lg:px-8">
           <nav className="flex items-center justify-between">
             <div className="flex items-center gap-2">
