@@ -13,6 +13,7 @@ export interface Reservation {
   pickupTime: string;
   pickupEndTime: string;
   createdAt: string;
+  completionPin?: string;
   rating?: {
     score: number;
     comment?: string;

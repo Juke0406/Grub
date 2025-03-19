@@ -1,12 +1,81 @@
-import { NextRequest, NextResponse } from "next/server";
-import { MongoClient } from "mongodb";
-import { getDatabase, toObjectId } from "@/lib/mongodb";
 import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
+import { getDatabase, toObjectId } from "@/lib/mongodb";
 import { Reservation } from "@/types/reservation";
+import { headers } from "next/headers";
+import { NextRequest, NextResponse } from "next/server";
 
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+    if (!session || !session.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const reservationId = params.id;
+    if (!reservationId) {
+      return NextResponse.json(
+        { error: "Reservation ID is required" },
+        { status: 400 }
+      );
+    }
+
+    const { status } = await request.json();
+    if (!status || !["confirmed", "ready", "completed"].includes(status)) {
+      return NextResponse.json(
+        { error: "Invalid status update" },
+        { status: 400 }
+      );
+    }
+
+    const reservationObjectId = toObjectId(reservationId);
+    if (!reservationObjectId) {
+      return NextResponse.json({ error: "Invalid objectId" }, { status: 400 });
+    }
+
+    const db = await getDatabase();
+    const collection = db.collection("reservations");
+
+    // Generate completion pin if status is being set to completed
+    const updateData: Partial<Reservation> = { status };
+    if (status === "completed") {
+      // Generate a 6-digit pin
+      const pin = Math.floor(100000 + Math.random() * 900000).toString();
+      updateData.completionPin = pin;
+    }
+
+    const result = await collection.findOneAndUpdate(
+      { _id: reservationObjectId },
+      { $set: updateData },
+      { returnDocument: "after" }
+    );
+
+    if (!result) {
+      return NextResponse.json(
+        { error: "Reservation not found" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(result);
+  } catch (error) {
+    console.error("Error updating reservation:", error);
+    return NextResponse.json(
+      { error: "Failed to update reservation" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     const session = await auth.api.getSession({
       headers: await headers(), // you need to pass the headers object.
