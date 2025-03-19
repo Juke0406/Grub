@@ -174,7 +174,7 @@ export function FoodItemCard({
             <DialogTitle>Reserve {name}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <p>Available stock: {quantity}</p>
+            <p className="text-muted-foreground">Available Stock: {quantity}</p>
             <div>
               <label className="text-sm mb-1 block">Select Quantity:</label>
               <Input

@@ -133,6 +133,7 @@ export function NavUser({
 
 function PortalSwitcher() {
   const { currentPortal, setPortal } = usePortalStore();
+  const router = useRouter();
 
   const items: { value: Portal; label: string; icon: LucideIcon }[] = [
     {
@@ -152,7 +153,12 @@ function PortalSwitcher() {
       {items.map(({ value, label, icon: Icon }) => (
         <DropdownMenuItem
           key={value}
-          onClick={() => setPortal(value)}
+          onClick={async () => {
+            setPortal(value);
+            // Small delay to ensure cookie is set before navigation
+            await new Promise((resolve) => setTimeout(resolve, 50));
+            router.push(value === "business" ? "/business" : "/browse/all");
+          }}
           className="flex items-center gap-2"
         >
           <Icon className="size-4" />

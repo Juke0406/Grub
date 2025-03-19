@@ -154,14 +154,6 @@ const businessNavigation = [
         title: "Store Profile",
         url: "/settings/store",
       },
-      {
-        title: "Business Hours",
-        url: "/settings/hours",
-      },
-      {
-        title: "Notifications",
-        url: "/settings/notifications",
-      },
     ],
   },
 ];
