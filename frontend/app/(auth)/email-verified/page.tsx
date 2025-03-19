@@ -1,12 +1,12 @@
-"use client"
+"use client";
 
+import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardHeader,
   CardContent,
   CardFooter,
+  CardHeader,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { CheckCircleIcon } from "lucide-react";
 
 export default function EmailVerifiedPage() {
@@ -15,7 +15,7 @@ export default function EmailVerifiedPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center space-y-1">
           <h2 className="text-2xl font-semibold tracking-tight">
-            Email Verified!
+            Email Verified
           </h2>
           <p className="text-sm text-muted-foreground">
             Thank you for verifying your email address.
@@ -28,7 +28,7 @@ export default function EmailVerifiedPage() {
             </div>
           </div>
           <div className="text-center">
-            <p className="text-lg text-gray-700">
+            <p className="text-gray-700">
               Your email has been successfully verified.
             </p>
           </div>
@@ -41,4 +41,4 @@ export default function EmailVerifiedPage() {
       </Card>
     </div>
   );
-};
+}

@@ -5,6 +5,7 @@ import { FoodItemCard } from "@/components/food-item-card";
 import { SearchHeader } from "@/components/search-header";
 import { useMobile } from "@/hooks/use-mobile";
 import data from "@/lib/data.json";
+import { cn } from "@/lib/utils";
 import { Beef, Coffee, Pizza, ShoppingBag, Soup } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -134,8 +135,6 @@ export default function BrowseAllPage() {
         <SearchHeader
           placeholder="Search for food items..."
           onSearch={setSearchQuery}
-          onSort={setSortBy}
-          // sortBy={sortBy}
         />
         <div className={isMobile ? "px-4" : "px-8 py-2"}>
           <CategoryFilter
@@ -162,7 +161,7 @@ export default function BrowseAllPage() {
       </div> */}
 
       {/* Main Content */}
-      <div className={isMobile ? "px-4" : "px-8"}>
+      <div className={cn(isMobile ? "px-4" : "px-8", "pb-4")}>
         <div className="max-w-[1600px] mx-auto">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {/* {sortedItems.map((item) => (

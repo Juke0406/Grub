@@ -53,6 +53,7 @@ export default function HistoryPage() {
                   key={reservation._id}
                   reservation={reservation}
                   onDelete={handleDelete}
+                />
               ))
             ) : (
               // Show message if no reservations

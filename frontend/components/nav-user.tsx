@@ -3,9 +3,7 @@
 import { usePortalStore, type Portal } from "@/lib/store";
 import {
   BadgeCheck,
-  Bell,
-  ChevronsUpDown,
-  CreditCard,
+  ChevronDown,
   LogOut,
   Store,
   User,
@@ -13,6 +11,7 @@ import {
 } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,7 +29,6 @@ import {
 } from "@/components/ui/sidebar";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
-import { Button } from "react-day-picker";
 import { toast } from "sonner";
 
 export function NavUser({
@@ -85,7 +83,7 @@ export function NavUser({
                 <span className="truncate font-medium">{user.name}</span>
                 <span className="truncate text-xs">{user.email}</span>
               </div>
-              <ChevronsUpDown className="ml-auto size-4" />
+              <ChevronDown className="ml-auto size-4" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -98,7 +96,13 @@ export function NavUser({
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                  <AvatarFallback className="rounded-lg">
+                    {user.name
+                      .split(" ")
+                      .slice(0, 2)
+                      .map((word) => word[0].toUpperCase())
+                      .join("")}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">{user.name}</span>
@@ -116,24 +120,9 @@ export function NavUser({
               <PortalSwitcher />
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheck />
-                Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCard />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Bell />
-                Notifications
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogOut}>
               <LogOut />
-              Log out
+              Log Out
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -144,6 +133,7 @@ export function NavUser({
 
 function PortalSwitcher() {
   const { currentPortal, setPortal } = usePortalStore();
+  const router = useRouter();
 
   const items: { value: Portal; label: string; icon: LucideIcon }[] = [
     {
@@ -163,7 +153,12 @@ function PortalSwitcher() {
       {items.map(({ value, label, icon: Icon }) => (
         <DropdownMenuItem
           key={value}
-          onClick={() => setPortal(value)}
+          onClick={async () => {
+            setPortal(value);
+            // Small delay to ensure cookie is set before navigation
+            await new Promise((resolve) => setTimeout(resolve, 50));
+            router.push(value === "business" ? "/business" : "/browse/all");
+          }}
           className="flex items-center gap-2"
         >
           <Icon className="size-4" />

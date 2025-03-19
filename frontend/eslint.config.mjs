@@ -14,6 +14,8 @@ const eslintConfig = [
   {
     rules: {
       "no-unused-vars": "warn",
+      "@typescript-eslint/no-unused-vars": "warn",
+      "react/no-unescaped-entities": "warn",
       "no-console": "warn",
       "prefer-const": "error",
       "no-undef": "error",

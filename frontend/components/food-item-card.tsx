@@ -122,7 +122,7 @@ export function FoodItemCard({
 
   return (
     <>
-      <div className="group bg-white rounded-xl overflow-hidden border border-gray-100 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] hover:border-gray-200">
+      <div className="group bg-white rounded-xl overflow-hidden border transition-all duration-300 hover:shadow-lg hover:scale-[1.02] hover:border-gray-200">
         <div className="relative h-48 bg-gray-100 overflow-hidden">
           <img
             src={image}
@@ -174,7 +174,7 @@ export function FoodItemCard({
             <DialogTitle>Reserve {name}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <p>Available stock: {quantity}</p>
+            <p className="text-muted-foreground">Available Stock: {quantity}</p>
             <div>
               <label className="text-sm mb-1 block">Select Quantity:</label>
               <Input
