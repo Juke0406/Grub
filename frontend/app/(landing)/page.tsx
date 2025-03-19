@@ -67,7 +67,7 @@ export default function HomePage() {
                   element?.scrollIntoView({ behavior: "smooth" });
                 }}
               >
-                Learn more ↓
+                Learn More ↓
               </Button>
             </div>
           </div>
