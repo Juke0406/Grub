@@ -4,7 +4,6 @@ import { CategoryFilter } from "@/components/category-filter";
 import { FoodItemCard } from "@/components/food-item-card";
 import { SearchHeader } from "@/components/search-header";
 import { useMobile } from "@/hooks/use-mobile";
-import data from "@/lib/data.json";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 
@@ -21,47 +20,13 @@ interface Item {
   rating: number;
   availableUntil: string;
   quantity: number;
+  storeAddress: string;
+  storeHoursToday: {
+    open: string;
+    close: string;
+    isOpen: boolean;
+  };
 }
-
-// Transform data from bakeries and supermarkets into a unified format
-const transformedItems = [
-  ...data.bakeries.flatMap((bakery) =>
-    bakery.items.map((item) => ({
-      id: item.id,
-      name: item.name,
-      shop: bakery.name,
-      type: "bakery",
-      category: item.name.toLowerCase().includes("mystery")
-        ? "mystery"
-        : item.name.toLowerCase().includes("bread")
-        ? "bread"
-        : "pastries",
-      originalPrice: item.originalPrice,
-      discountedPrice: item.discountedPrice,
-      image: item.image,
-      distance: Math.random() * 5, // In a real app, this would be calculated based on user's location
-      rating: bakery.rating,
-      availableUntil: item.pickupPeriod,
-      quantity: item.quantity,
-    }))
-  ),
-  ...data.supermarkets.flatMap((supermarket) =>
-    supermarket.items.map((item) => ({
-      id: item.id,
-      name: item.name,
-      shop: supermarket.name,
-      type: "supermarket",
-      category: item.name.toLowerCase().includes("meat") ? "meat" : "produce",
-      originalPrice: item.originalPrice,
-      discountedPrice: item.discountedPrice,
-      image: item.image,
-      distance: Math.random() * 5, // In a real app, this would be calculated based on user's location
-      rating: supermarket.rating,
-      availableUntil: item.pickupPeriod,
-      quantity: item.quantity,
-    }))
-  ),
-];
 
 export default function BrowseAllPage() {
   useEffect(() => {
@@ -72,19 +37,24 @@ export default function BrowseAllPage() {
         const transformed = data.products.map((product: any) => ({
           id: product._id,
           name: product.name,
-          shop: product.storeId || "Unknown Store",
-          type: product.category, // assuming "type" = category
+          shop: product.storeName || "Unknown Store",
+          type: product.category,
           category: product.category,
           originalPrice: product.originalPrice,
           discountedPrice: product.discountedPrice,
           image: product.imageUrl,
-          distance: Math.random() * 5, // you can replace this with real geo logic later
-          rating: Math.floor(Math.random() * 5) + 1, // mock rating, replace with real data when ready
+          distance: Math.random() * 5,
+          rating: Math.floor(Math.random() * 5) + 1,
           availableUntil: product.inventory.expirationDate,
           quantity: product.inventory.quantity,
+          storeAddress: product.storeAddress || "Address not available",
+          storeHoursToday: product.storeHoursToday || {
+            open: "09:00",
+            close: "17:00",
+            isOpen: true,
+          },
         }));
         setItems(transformed);
-        console.log(transformed);
       } catch (error) {
         console.error("Error fetching products:", error);
       }
@@ -99,8 +69,6 @@ export default function BrowseAllPage() {
   const isMobile = useMobile();
   const [items, setItems] = useState<Item[]>([]);
 
-  // Filter items based on category and search query
-  // const filteredItems = transformedItems.filter((item) => {
   const filteredItems = items.filter((item) => {
     const matchesCategory =
       activeCategory === "all" || item.category === activeCategory;
@@ -112,7 +80,6 @@ export default function BrowseAllPage() {
     return matchesCategory && matchesSearch;
   });
 
-  // Sort items based on selected sort option
   const sortedItems = [...filteredItems].sort((a, b) => {
     switch (sortBy) {
       case "nearest":
@@ -132,7 +99,6 @@ export default function BrowseAllPage() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Header Section */}
       <div className="w-full">
         <SearchHeader
           placeholder="Search for food items..."
@@ -146,22 +112,6 @@ export default function BrowseAllPage() {
         </div>
       </div>
 
-      {/* Main Content */}
-      {/* <div className={isMobile ? "px-4" : "px-8"}>
-        <div className="max-w-[1600px] mx-auto">
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {sortedItems.map((item) => (
-              <FoodItemCard
-                key={item.id}
-                {...item}
-                distance={`${item.distance} km`}
-              />
-            ))}
-          </div>
-        </div>
-      </div> */}
-
-      {/* Main Content */}
       <div className={cn(isMobile ? "px-4" : "px-8", "pb-4")}>
         <div className="max-w-[1600px] mx-auto">
           {sortedItems.length === 0 ? (
@@ -204,13 +154,16 @@ export default function BrowseAllPage() {
                   image={item.image}
                   availableUntil={item.availableUntil}
                   quantity={item.quantity}
+                  storeAddress={item.storeAddress}
+                  storeHoursToday={item.storeHoursToday}
+                  distance={item.distance}
                   onReservationComplete={async () => {
                     const response = await fetch("/api/products");
                     const data = await response.json();
                     const transformed = data.products.map((product: any) => ({
                       id: product._id,
                       name: product.name,
-                      shop: product.storeId || "Unknown Store",
+                      shop: product.storeName || "Unknown Store",
                       type: product.category,
                       category: product.category,
                       originalPrice: product.originalPrice,
@@ -220,6 +173,13 @@ export default function BrowseAllPage() {
                       rating: Math.floor(Math.random() * 5) + 1,
                       availableUntil: product.inventory.expirationDate,
                       quantity: product.inventory.quantity,
+                      storeAddress:
+                        product.storeAddress || "Address not available",
+                      storeHoursToday: product.storeHoursToday || {
+                        open: "09:00",
+                        close: "17:00",
+                        isOpen: true,
+                      },
                     }));
                     setItems(transformed);
                   }}

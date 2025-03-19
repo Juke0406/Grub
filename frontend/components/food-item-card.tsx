@@ -9,7 +9,15 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { CheckCircle, Clock, Loader2 } from "lucide-react";
+import {
+  CheckCircle,
+  Clock,
+  Loader2,
+  MapPin,
+  Navigation,
+  Store,
+  Timer,
+} from "lucide-react";
 import { useState } from "react";
 
 interface FoodItemProps {
@@ -21,6 +29,32 @@ interface FoodItemProps {
   image: string;
   availableUntil: string;
   quantity: number;
+  storeAddress: string;
+  distance: number;
+  storeHoursToday: {
+    open: string;
+    close: string;
+    isOpen: boolean;
+  };
+}
+
+function formatDate(dateString: string) {
+  return new Date(dateString).toLocaleString(undefined, {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+    hour12: true,
+  });
+}
+
+function formatStoreHours(time: string) {
+  return new Date(`1970-01-01T${time}`).toLocaleTimeString(undefined, {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
 }
 
 export function FoodItemCard({
@@ -32,6 +66,9 @@ export function FoodItemCard({
   image,
   availableUntil,
   quantity,
+  storeAddress,
+  distance,
+  storeHoursToday,
   onReservationComplete,
 }: FoodItemProps & { onReservationComplete?: () => void }) {
   const [open, setOpen] = useState(false);
@@ -136,14 +173,41 @@ export function FoodItemCard({
 
         <div className="p-5 space-y-4">
           <h3 className="font-semibold text-lg">{name}</h3>
-          <p className="text-sm text-muted-foreground">{shop}</p>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Store className="w-4 h-4" />
+            <p>{shop}</p>
+          </div>
 
-          <div className="flex items-center gap-4 text-sm text-muted-foreground border-t border-b border-gray-50 py-3">
+          <div className="space-y-2 text-sm text-muted-foreground border-t border-b border-gray-50 py-3">
             <div className="flex items-center gap-1">
               <Clock className="w-4 h-4" />
-              <span>{availableUntil}</span>
+              <span>Available until {formatDate(availableUntil)}</span>
             </div>
-            <div>Stock: {quantity}</div>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-1">
+                <MapPin className="w-4 h-4" />
+                <span>{storeAddress}</span>
+              </div>
+              <div className="flex items-center gap-1 text-blue-600">
+                <Navigation className="w-4 h-4" />
+                <span>{distance.toFixed(1)} km</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-1">
+              <Timer className="w-4 h-4" />
+              <span
+                className={
+                  storeHoursToday.isOpen ? "text-green-600" : "text-red-500"
+                }
+              >
+                {storeHoursToday.isOpen ? "Open" : "Closed"} ·{" "}
+                {formatStoreHours(storeHoursToday.open)} -{" "}
+                {formatStoreHours(storeHoursToday.close)}
+              </span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div>Stock: {quantity}</div>
+            </div>
           </div>
 
           <div className="flex justify-between items-center pt-1">

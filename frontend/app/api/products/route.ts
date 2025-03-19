@@ -40,13 +40,79 @@ export async function GET(request: NextRequest) {
       query.category = { $in: categories };
     }
 
-    // Execute query with pagination
+    // Execute query with pagination and get store information
     const collection = db.collection("products");
     const products = await collection
-      .find(query)
-      .sort({ "inventory.expirationDate": 1 }) // Sort by expiration date (soonest first)
-      .skip(skip)
-      .limit(limit)
+      .aggregate([
+        { $match: query },
+        { $sort: { "inventory.expirationDate": 1 } },
+        { $skip: skip },
+        { $limit: limit },
+        {
+          $lookup: {
+            from: "stores",
+            let: { storeId: { $toObjectId: "$storeId" } },
+            pipeline: [
+              { $match: { $expr: { $eq: ["$_id", "$$storeId"] } } },
+              { $project: { name: 1, location: 1, hours: 1 } },
+            ],
+            as: "store",
+          },
+        },
+        {
+          $addFields: {
+            storeName: { $arrayElemAt: ["$store.name", 0] },
+            storeAddress: { $arrayElemAt: ["$store.location.address", 0] },
+            storeHoursToday: {
+              $let: {
+                vars: {
+                  dayIndex: {
+                    $switch: {
+                      branches: [
+                        {
+                          case: { $eq: [{ $dayOfWeek: new Date() }, 1] },
+                          then: 6,
+                        }, // Sunday
+                        {
+                          case: { $eq: [{ $dayOfWeek: new Date() }, 2] },
+                          then: 0,
+                        }, // Monday
+                        {
+                          case: { $eq: [{ $dayOfWeek: new Date() }, 3] },
+                          then: 1,
+                        }, // Tuesday
+                        {
+                          case: { $eq: [{ $dayOfWeek: new Date() }, 4] },
+                          then: 2,
+                        }, // Wednesday
+                        {
+                          case: { $eq: [{ $dayOfWeek: new Date() }, 5] },
+                          then: 3,
+                        }, // Thursday
+                        {
+                          case: { $eq: [{ $dayOfWeek: new Date() }, 6] },
+                          then: 4,
+                        }, // Friday
+                        {
+                          case: { $eq: [{ $dayOfWeek: new Date() }, 7] },
+                          then: 5,
+                        }, // Saturday
+                      ],
+                      default: 0,
+                    },
+                  },
+                },
+                in: { $arrayElemAt: ["$store.hours", "$$dayIndex"] },
+              },
+            },
+          },
+        },
+        {
+          $project: {
+            store: 0, // Remove the store array since we extracted what we need
+          },
+        },
+      ])
       .toArray();
 
     // Get total count for pagination
