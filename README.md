@@ -116,7 +116,7 @@ The application serves three main user types:
 ## Project Structure
 
 ```bash
-gloria/
+grub/
 ├── frontend/                 # Next.js frontend application
 │   ├── app/                 # App router pages
 │   ├── components/          # Reusable React components
@@ -153,48 +153,48 @@ gloria/
 
 1. Clone the repository
 
-    ```bash
-    git clone [repository-url]
-    cd gloria
-    ```
+   ```bash
+   git clone [repository-url]
+   cd grub
+   ```
 
 2. Install frontend dependencies
 
-    ```bash
-    cd frontend
-    pnpm install
-    ```
+   ```bash
+   cd frontend
+   pnpm install
+   ```
 
 3. Set up environment variables
 
-    ```bash
-    # Frontend
-    cp frontend/.env.example frontend/.env.local
+   ```bash
+   # Frontend
+   cp frontend/.env.example frontend/.env.local
 
-    # Services
-    cp services/auth-service/.env.example services/auth-service/.env
-    cp services/reservation-service/.env.example services/reservation-service/.env
-    # ... repeat for other services
-    ```
+   # Services
+   cp services/auth-service/.env.example services/auth-service/.env
+   cp services/reservation-service/.env.example services/reservation-service/.env
+   # ... repeat for other services
+   ```
 
 4. Start infrastructure services
 
-    ```bash
-    docker compose -f infrastructure/docker-compose.yml up -d
-    ```
+   ```bash
+   docker compose -f infrastructure/docker-compose.yml up -d
+   ```
 
 5. Deploy microservices (development)
 
-    ```bash
-    kubectl apply -f infrastructure/kubernetes/dev/
-    ```
+   ```bash
+   kubectl apply -f infrastructure/kubernetes/dev/
+   ```
 
 6. Run the frontend development server
 
-    ```bash
-    cd frontend
-    pnpm dev
-    ```
+   ```bash
+   cd frontend
+   pnpm dev
+   ```
 
 The application will be available at `http://localhost:3000`
 
@@ -202,15 +202,15 @@ The application will be available at `http://localhost:3000`
 
 1. Build service images
 
-    ```bash
-    docker compose -f infrastructure/docker-compose.prod.yml build
-    ```
+   ```bash
+   docker compose -f infrastructure/docker-compose.prod.yml build
+   ```
 
 2. Deploy to Kubernetes
 
-    ```bash
-    kubectl apply -f infrastructure/kubernetes/prod/
-    ```
+   ```bash
+   kubectl apply -f infrastructure/kubernetes/prod/
+   ```
 
 ## API Documentation
 

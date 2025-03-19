@@ -1,18 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardHeader,
   CardContent,
+  CardDescription,
   CardFooter,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { LoaderCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
+import { LoaderCircle } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export default function ResetPasswordPage() {
@@ -61,13 +63,13 @@ export default function ResetPasswordPage() {
     return (
       <div className="bg-gray-100 min-h-screen flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
-          <CardHeader className="text-center space-y-1">
-            <h2 className="text-2xl font-semibold tracking-tight">
+          <CardHeader>
+            <CardTitle className="text-2xl font-medium">
               Invalid Token
-            </h2>
-            <p className="text-sm text-muted-foreground">
+            </CardTitle>
+            <CardDescription className="text-sm text-muted-foreground">
               The reset password token is invalid or has expired.
-            </p>
+            </CardDescription>
           </CardHeader>
         </Card>
       </div>
@@ -78,13 +80,13 @@ export default function ResetPasswordPage() {
     <div className="bg-gray-100 min-h-screen flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <form onSubmit={handleOnSubmit}>
-          <CardHeader className="text-center space-y-1">
-            <h2 className="text-2xl font-semibold tracking-tight">
+          <CardHeader>
+            <CardTitle className="text-2xl font-medium">
               Reset Your Password
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              Enter your new password below.
-            </p>
+            </CardTitle>
+            <CardDescription className="text-sm text-muted-foreground">
+              Enter your new password below
+            </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4 py-4">
             <div className="grid gap-2">

@@ -1,4 +1,5 @@
 import { Inter } from "next/font/google";
+import React from "react";
 import "./globals.css";
 import { metadata } from "./metadata";
 import { AppProvider } from "./provider";

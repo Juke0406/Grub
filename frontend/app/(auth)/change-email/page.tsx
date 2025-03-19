@@ -1,19 +1,17 @@
 "use client";
 
-import { useEffect } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardHeader,
   CardContent,
   CardFooter,
+  CardHeader,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { CheckCircleIcon } from "lucide-react";
-import { authClient } from "@/lib/auth-client";
+import React, { useEffect } from "react";
 
 const EmailVerifiedPage: React.FC = () => {
-    useEffect(() => {
-    }, [])
+  useEffect(() => {}, []);
   return (
     <div className="bg-gray-100 min-h-screen flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
