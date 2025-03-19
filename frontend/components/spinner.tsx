@@ -1,7 +1,11 @@
-export const Spinner = () => (
-  <div className="w-full h-full p-6 rounded-xl shadow-lg flex flex-col justify-center items-center gap-3">
+interface SpinnerProps {
+  className?: string;
+}
+
+export const Spinner = ({ className }: SpinnerProps) => (
+  <div className="flex flex-col justify-center items-center gap-3">
     <svg
-      className="animate-spin h-6 w-6 text-indigo-500"
+      className={`animate-spin text-green-500 ${className || "h-6 w-6"}`}
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       viewBox="0 0 24 24"

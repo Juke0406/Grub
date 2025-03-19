@@ -34,10 +34,18 @@ export async function GET(request: NextRequest) {
     // Build query object with store ID
     const query: any = { storeId: store._id.toString() };
 
-    // Add category filter if provided
+    // Add filters
     if (category) {
       const categories = category.split(",");
       query.category = { $in: categories };
+    }
+
+    const search = searchParams.get("search");
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { storeName: { $regex: search, $options: "i" } },
+      ];
     }
 
     // Execute query with pagination and get store information

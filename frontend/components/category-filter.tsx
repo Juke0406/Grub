@@ -3,8 +3,8 @@
 import { Button } from "@/components/ui/button";
 import { useMobile } from "@/hooks/use-mobile";
 import {
-  BaggageClaim,
   ChefHat,
+  CircleHelp,
   Cookie,
   LayoutGrid,
   Milk,
@@ -19,7 +19,7 @@ export const PRODUCT_CATEGORIES = [
   { id: "meat", name: "Meat", icon: <ChefHat className="h-4 w-4" /> },
   { id: "dairy", name: "Dairy", icon: <Milk className="h-4 w-4" /> },
   { id: "produce", name: "Produce", icon: <Pizza className="h-4 w-4" /> },
-  { id: "others", name: "Others", icon: <BaggageClaim className="h-4 w-4" /> },
+  { id: "others", name: "Others", icon: <CircleHelp className="h-4 w-4" /> },
 ] as const;
 
 interface CategoryFilterProps {
