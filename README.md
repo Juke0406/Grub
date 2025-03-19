@@ -134,9 +134,12 @@ graph TD
 5. **Creation Service**
 
    - Business onboarding
-   - Product creation and updates
-   - Bundle generation
+   - Product creation and updates with validation
+   - Bundle generation and management
    - Category management
+   - Product status tracking (active, sold out, expired, draft)
+   - Discount percentage calculation
+   - Image validation and management
 
 6. **ML Algorithm Service**
 
@@ -144,6 +147,8 @@ graph TD
    - Predictive analytics
    - Inventory optimization
    - Sales forecasting
+   - Health monitoring and reporting
+   - Containerized deployment with Node.js
 
 7. **API Management Service**
    - API versioning
@@ -215,6 +220,14 @@ graph TD
 - Automated price adjustment system
 - Real-time inventory sync
 
+### Side Application
+
+- Demo client for business integration
+- Simulates database scanning for surplus products
+- Applies discounts automatically
+- Sends product data to GRUB via API
+- Demonstrates API key usage
+
 ## Project Structure
 
 ```mermaid
@@ -224,11 +237,13 @@ graph TD
     Services[services/]
     Infra[infrastructure/]
     Docs[docs/]
+    Side[side_application/]
 
     Root --> Frontend
     Root --> Services
     Root --> Infra
     Root --> Docs
+    Root --> Side
 
     Frontend --> App[app/]
     Frontend --> Comp[components/]
@@ -254,6 +269,7 @@ graph TD
     style Services fill:#9cf,stroke:#333
     style Infra fill:#ff9,stroke:#333
     style Docs fill:#9f9,stroke:#333
+    style Side fill:#f69,stroke:#333
 ```
 
 ```bash
@@ -269,14 +285,15 @@ grub/
 │   ├── reservation-service/# Reservation management
 │   ├── listing-service/    # Product listing and management
 │   ├── prediction-service/ # Demand prediction and analytics
-│   ├── creation-service/   # Product/bundle creation
-│   ├── ml-service/        # Machine learning algorithms
+│   ├── creation-service/   # Product/bundle creation with validation
+│   ├── ml-service/        # Machine learning algorithms with health monitoring
 │   └── api-service/       # API gateway and management
 ├── infrastructure/
 │   ├── envoy/             # Service mesh configuration
 │   ├── kafka/             # Event streaming setup
 │   ├── redis/             # Caching layer
 │   └── kubernetes/        # K8s deployment configs
+├── side_application/      # Demo client application for business integration
 └── docs/                  # Documentation
 ```
 
@@ -315,6 +332,9 @@ grub/
    # Services
    cp services/auth-service/.env.example services/auth-service/.env
    cp services/reservation-service/.env.example services/reservation-service/.env
+   cp services/creation-service/.env.example services/creation-service/.env
+   cp services/listing-service/.env.example services/listing-service/.env
+   cp services/prediction-service/.env.example services/prediction-service/.env
    # ... repeat for other services
    ```
 
@@ -337,7 +357,18 @@ grub/
    pnpm dev
    ```
 
-The application will be available at `http://localhost:3000`
+7. Set up the side application (optional)
+
+   ```bash
+   cd side_application
+   python3 -m venv ./venv
+   source ./venv/bin/activate
+   pip install -r requirements.txt
+   python3 main.py
+   ```
+
+The main application will be available at `http://localhost:3000`
+The side application demo will be available at its own interface
 
 ### Production Deployment
 
@@ -417,6 +448,70 @@ Content-Type: application/json
   "available": boolean
 }
 ```
+
+### Creation Service API
+
+Base URL: `/api/creation/v1`
+
+#### Product Endpoints
+
+##### Create Product
+
+```bash
+POST /products
+Content-Type: application/json
+
+{
+  "name": string,
+  "description": string,
+  "originalPrice": number,
+  "discountedPrice": number,
+  "quantity": number,
+  "categories": string[],
+  "images": string[],
+  "expiryDate": string,
+  "pickupWindow": {
+    "start": string,
+    "end": string
+  }
+}
+```
+
+##### Create Bundle
+
+```bash
+POST /bundles
+Content-Type: application/json
+
+{
+  "name": string,
+  "description": string,
+  "originalPrice": number,
+  "discountedPrice": number,
+  "products": [
+    {
+      "productId": string,
+      "quantity": number
+    }
+  ],
+  "totalQuantity": number,
+  "images": string[],
+  "expiryDate": string,
+  "pickupWindow": {
+    "start": string,
+    "end": string
+  }
+}
+```
+
+### Side Application Integration
+
+The side application demonstrates how business clients can integrate with GRUB:
+
+1. Generate an API key from the GRUB application at `/api/api-keys`
+2. Configure the side application with your API key
+3. Run the side application and use the demo button to send product data
+4. Verify the API key usage metrics in the GRUB dashboard
 
 ## Development Guidelines
 
