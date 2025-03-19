@@ -90,7 +90,7 @@ export function LoginForm({
                   required
                 />
               </div>
-              <Button type="submit" className="w-full">
+              <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? (
                   <div className="flex items-center justify-center gap-2">
                     <LoaderCircle className="animate-spin" />

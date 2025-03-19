@@ -111,7 +111,11 @@ export default function ResetPasswordPage() {
             </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-2 sm:flex-row sm:space-x-2 sm:space-y-0 justify-end">
-            <Button type="submit" className="flex justify-center items-center">
+            <Button
+              type="submit"
+              className="flex justify-center items-center"
+              disabled={isLoading}
+            >
               {isLoading ? (
                 <div className="flex items-center justify-center gap-2">
                   <LoaderCircle className="animate-spin" />
