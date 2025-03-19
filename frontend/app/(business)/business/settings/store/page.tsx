@@ -47,6 +47,7 @@ export default function StoreSettingsPage() {
     defaultValues: {
       name: "",
       type: StoreType.BAKERY,
+      image: "",
       description: "",
       location: {
         address: "",
@@ -108,7 +109,11 @@ export default function StoreSettingsPage() {
   };
 
   if (isPending) {
-    return <Spinner />;
+    return (
+      <div className="flex w-full h-screen items-center justify-center">
+        <Spinner />
+      </div>
+    );
   }
 
   return (
@@ -129,6 +134,24 @@ export default function StoreSettingsPage() {
                     <FormLabel>Store Name</FormLabel>
                     <FormControl>
                       <Input placeholder="Enter store name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="image"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Store Image URL</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Enter store image URL"
+                        type="url"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

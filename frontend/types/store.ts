@@ -23,6 +23,7 @@ export type Store = {
   ownerId: string;
   name: string;
   description?: string;
+  image?: string;
   location: {
     address: string;
     coordinates?: {

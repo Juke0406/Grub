@@ -52,6 +52,7 @@ export async function POST(req: Request) {
       contactNumber,
       email,
       type,
+      image,
     } = body;
 
     if (!name || !location || !businessHours || !type) {
@@ -79,6 +80,7 @@ export async function POST(req: Request) {
       businessHours,
       contactNumber,
       email,
+      image,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -115,6 +117,7 @@ export async function PUT(req: Request) {
       contactNumber,
       email,
       type,
+      image,
     } = body;
 
     if (!name || !location || !businessHours || !type) {
@@ -139,6 +142,7 @@ export async function PUT(req: Request) {
       businessHours,
       contactNumber,
       email,
+      image,
       createdAt: existingStore.createdAt,
       updatedAt: new Date(),
     };

@@ -268,7 +268,11 @@ export default function ProductsPage() {
   };
 
   if (isPending) {
-    return <Spinner />;
+    return (
+      <div className="flex w-full h-screen items-center justify-center">
+        <Spinner />
+      </div>
+    );
   }
 
   if (!session) {
@@ -311,7 +315,11 @@ export default function ProductsPage() {
   }
 
   if (isStoreLoading) {
-    return <Spinner />;
+    return (
+      <div className="flex w-full h-screen items-center justify-center">
+        <Spinner />
+      </div>
+    );
   }
 
   return (

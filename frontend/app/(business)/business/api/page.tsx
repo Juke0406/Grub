@@ -227,7 +227,11 @@ export default function BusinessDashboard() {
   const currentCost = (totalRequests * REQUEST_COST).toFixed(2);
 
   if (loading) {
-    return <Spinner />;
+    return (
+      <div className="flex w-full h-screen items-center justify-center">
+        <Spinner />
+      </div>
+    );
   }
 
   if (!userId) {
