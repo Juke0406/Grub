@@ -1,13 +1,16 @@
-import { Reservation } from "@/types/reservation";
-import { STATUS_BADGES } from "@/types/reservation";
-import { Card } from "../ui/card";
-import { Button } from "../ui/button";
-import { Badge } from "../ui/badge";
-import { MapPin, Clock, CheckCircle2, AlertTriangle, Loader2 } from "lucide-react";
+import { Reservation, STATUS_BADGES } from "@/types/reservation";
+import { CheckCircle2, Clock, MapPin } from "lucide-react";
 import { useState } from "react";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
+import { Badge } from "../ui/badge";
+import { Card } from "../ui/card";
 
-export function CancelledReservationCard({ reservation }: { reservation: Reservation}) {
+export function CancelledReservationCard({
+  reservation,
+  onDelete,
+}: {
+  reservation: Reservation;
+  onDelete?: (id: string) => void;
+}) {
   const pickupDate = new Date(reservation.pickupTime);
   const endPickupDate = new Date(reservation.pickupEndTime);
   const status = STATUS_BADGES[reservation.status];
@@ -22,11 +25,14 @@ export function CancelledReservationCard({ reservation }: { reservation: Reserva
       await fetch(`/api/reservation/${reservation._id}`, {
         method: "DELETE",
       });
-      console.log(reservation._id)
+      console.log(reservation._id);
       setSuccess(true);
+      // Call onDelete if provided to update parent component state
+      if (onDelete) {
+        onDelete(reservation._id);
+      }
       setTimeout(() => {
-        setOpen(false); 
-        // Optional: Trigger a re-fetch or state update in parent to remove the card
+        setOpen(false);
       }, 1500);
     } catch (error) {
       console.error("Error cancelling reservation:", error);

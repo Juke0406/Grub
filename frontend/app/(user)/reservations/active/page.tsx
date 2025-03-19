@@ -1,24 +1,21 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useReservations } from "@/hooks/use-reservations";
-import { useMobile } from "@/hooks/use-mobile";
-import { CheckCircle2, Clock, MapPin } from "lucide-react";
-import { Reservation, STATUS_BADGES } from "@/types/reservation";
 import { ReservationCard } from "@/components/reservation/reservation-card";
 import { ReservationSkeleton } from "@/components/reservation/reservation-skeleton";
-import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { useMobile } from "@/hooks/use-mobile";
+import { useReservations } from "@/hooks/use-reservations";
+import { Reservation } from "@/types/reservation";
 import { redirect } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function ActiveReservationsPage() {
   const isMobile = useMobile();
   const { reservations, isLoading, error } = useReservations({
     status: "pending,confirmed,ready",
   });
-  const [localReservations, setLocalReservations] = useState<Reservation[]>(reservations);
+  const [localReservations, setLocalReservations] =
+    useState<Reservation[]>(reservations);
 
   // Keep local state in sync with the hook data
   useEffect(() => {
@@ -49,9 +46,9 @@ export default function ActiveReservationsPage() {
               Array(3)
                 .fill(0)
                 .map((_, index) => <ReservationSkeleton key={index} />)
-            ) : reservations.length > 0 ? (
+            ) : localReservations.length > 0 ? (
               // Show reservations if available
-              reservations.map((reservation) => (
+              localReservations.map((reservation) => (
                 <ReservationCard
                   key={reservation._id}
                   reservation={reservation}
