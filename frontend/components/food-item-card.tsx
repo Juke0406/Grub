@@ -233,14 +233,76 @@ export function FoodItemCard({
 
       {/* Modal */}
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>Reserve {name}</DialogTitle>
+            <DialogTitle>Reserve Item</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            <p className="text-muted-foreground">Available Stock: {quantity}</p>
-            <div>
-              <label className="text-sm mb-1 block">Select Quantity:</label>
+          <div className="space-y-6">
+            {/* Image and basic info */}
+            <div className="flex gap-4">
+              <img
+                src={image}
+                alt={name}
+                className="w-32 h-32 object-cover rounded-lg"
+              />
+              <div className="space-y-2">
+                <h3 className="font-semibold text-lg">{name}</h3>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Store className="w-4 h-4" />
+                  <p>{shop}</p>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-sm text-muted-foreground line-through block">
+                    ${originalPrice.toFixed(2)}
+                  </span>
+                  <span className="text-xl font-bold text-green-600 flex items-center gap-1">
+                    <span className="text-sm font-normal text-green-500">
+                      $
+                    </span>
+                    {discountedPrice.toFixed(2)}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Store details */}
+            <div className="space-y-2 text-sm text-muted-foreground border-t border-b py-3">
+              <div className="flex items-center gap-1">
+                <Clock className="w-4 h-4" />
+                <span>Available until {formatDate(availableUntil)}</span>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-1">
+                  <MapPin className="w-4 h-4" />
+                  <span>{storeAddress}</span>
+                </div>
+                <div className="flex items-center gap-1 text-blue-600">
+                  <Navigation className="w-4 h-4" />
+                  <span>{distance.toFixed(1)} km</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-1">
+                <Timer className="w-4 h-4" />
+                <span
+                  className={
+                    storeHoursToday.isOpen ? "text-green-600" : "text-red-500"
+                  }
+                >
+                  {storeHoursToday.isOpen ? "Open" : "Closed"} ·{" "}
+                  {formatStoreHours(storeHoursToday.open)} -{" "}
+                  {formatStoreHours(storeHoursToday.close)}
+                </span>
+              </div>
+            </div>
+
+            {/* Quantity selector */}
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <label className="text-sm font-medium">Select Quantity:</label>
+                <span className="text-sm text-muted-foreground">
+                  Available: {quantity}
+                </span>
+              </div>
               <Input
                 type="number"
                 min={1}
