@@ -6,18 +6,44 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { useMobile } from "@/hooks/use-mobile";
-import { useEffect, useState } from "react";
 import { authClient } from "@/lib/auth-client";
-import { useRouter } from "next/navigation";
 import { LoaderCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
+
+interface UserProfile {
+  name: string;
+  email: string;
+  phoneNumber?: string;
+  emailNotifications?: boolean;
+  smsNotifications?: boolean;
+}
+
+interface SessionUser extends UserProfile {
+  id: string;
+  emailVerified: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  image?: string | null;
+}
 
 export default function ProfileSettingsPage() {
   const isMobile = useMobile();
-  const [user, setUser] = useState({ name: "", email: "" });
-  const [newEmail, setNewEmail] = useState("");
-  const [newName, setNewName] = useState("");
-  const [newPhone, setNewPhone] = useState("");
+  const [user, setUser] = useState<UserProfile>({
+    name: "",
+    email: "",
+    phoneNumber: "",
+    emailNotifications: true,
+    smsNotifications: true,
+  });
+  const [formData, setFormData] = useState<UserProfile>({
+    name: "",
+    email: "",
+    phoneNumber: "",
+    emailNotifications: true,
+    smsNotifications: true,
+  });
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
@@ -25,106 +51,118 @@ export default function ProfileSettingsPage() {
     async function fetchUser() {
       try {
         const { data: session } = await authClient.getSession();
-        setUser({
-          name: session?.user?.name || "",
-          email: session?.user?.email || "",
-          phoneNumber: session?.user?.phoneNumber || "",
-        });
-      } catch {
-        console.error("Failed to fetch user");
+        const user = session?.user as SessionUser;
+        const userData: UserProfile = {
+          name: user?.name || "",
+          email: user?.email || "",
+          phoneNumber: user?.phoneNumber || "",
+          emailNotifications: user?.emailNotifications ?? true,
+          smsNotifications: user?.smsNotifications ?? true,
+        };
+        setUser(userData);
+        setFormData(userData);
+      } catch (error) {
+        console.error("Failed to fetch user", error);
+        toast.error("Failed to load profile data");
       }
     }
     fetchUser();
   }, []);
 
   const handleOnSubmit = async () => {
-    if (newEmail) {
-      setIsLoading(true);
-      try {
+    if (JSON.stringify(user) === JSON.stringify(formData)) {
+      toast.info("No changes to save");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      // Handle email change separately as it requires special flow
+      if (formData.email !== user.email) {
         await authClient.changeEmail({
-          newEmail: newEmail,
+          newEmail: formData.email,
           callbackURL: "/change-email",
         });
-      } catch (error) {
-        setIsLoading(false);
-        toast.error("Error changing email");
       }
-      setIsLoading(false);
+
+      // Handle other updates
+      const updates = {
+        name: formData.name !== user.name ? formData.name : undefined,
+        phoneNumber:
+          formData.phoneNumber !== user.phoneNumber
+            ? formData.phoneNumber
+            : undefined,
+        emailNotifications:
+          formData.emailNotifications !== user.emailNotifications
+            ? formData.emailNotifications
+            : undefined,
+        smsNotifications:
+          formData.smsNotifications !== user.smsNotifications
+            ? formData.smsNotifications
+            : undefined,
+      };
+
+      // Only call updateUser if there are non-email changes
+      if (Object.values(updates).some((val) => val !== undefined)) {
+        await authClient.updateUser(updates);
+      }
+
       toast.success("Profile updated successfully");
-    } else if (newName) {
-      setIsLoading(true);
-      try {
-        await authClient.updateUser({
-          name: newName,
-        });
-      } catch (error) {
-        setIsLoading(false);
-        toast.error("Error updating profile");
-      }
       window.location.reload();
+    } catch (error) {
+      console.error("Error updating profile", error);
+      toast.error("Failed to update profile");
+    } finally {
       setIsLoading(false);
-      toast.success("Profile updated successfully");
-    } else if (newPhone) {
-      setIsLoading(true);
-      try {
-        await authClient.updateUser({
-          phoneNumber: newPhone,
-        });
-      } catch (error) {
-        setIsLoading(false);
-        toast.error("Error updating profile");
-      }
-      window.location.reload();
-      setIsLoading(false);
-      toast.success("Profile updated successfully");
-    } else {
-      toast.error("No changes made");
     }
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-muted">
+    <div className="flex flex-col min-h-screen justify-center items-center">
       <div className={isMobile ? "px-4" : "px-8"}>
-        <div className="max-w-[600px] mx-auto py-6">
+        <div className="max-w-[600px] py-6">
           <h1 className="text-2xl font-medium mb-6">Profile Settings</h1>
 
           <div className="bg-background rounded-lg border p-6">
             <div className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="name">Full Name</Label>
-                <Input id="name" value={user.name} readOnly />
                 <Input
                   id="name"
+                  value={formData.name}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, name: e.target.value }))
+                  }
                   placeholder="Enter your full name"
-                  onChange={(e) => {
-                    setNewName(e.target.value);
-                  }}
                 />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" value={user.email} readOnly />
                 <Input
                   id="email"
                   type="email"
+                  value={formData.email}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, email: e.target.value }))
+                  }
                   placeholder="Enter your email"
-                  onChange={(e) => {
-                    setNewEmail(e.target.value);
-                  }}
                 />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="phone">Phone Number</Label>
-                <Input id="phone" value={user.phoneNumber} readOnly />
                 <Input
                   id="phone"
                   type="tel"
+                  value={formData.phoneNumber}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      phoneNumber: e.target.value,
+                    }))
+                  }
                   placeholder="Enter your phone number"
-                  onChange={(e) => {
-                    setNewPhone(e.target.value);
-                  }}
                 />
               </div>
 
@@ -140,7 +178,15 @@ export default function ProfileSettingsPage() {
                       Receive updates about your reservations
                     </p>
                   </div>
-                  <Switch />
+                  <Switch
+                    checked={formData.emailNotifications}
+                    onCheckedChange={(checked) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        emailNotifications: checked,
+                      }))
+                    }
+                  />
                 </div>
 
                 <div className="flex items-center justify-between">
@@ -150,22 +196,36 @@ export default function ProfileSettingsPage() {
                       Get text messages about pickup reminders
                     </p>
                   </div>
-                  <Switch />
+                  <Switch
+                    checked={formData.smsNotifications}
+                    onCheckedChange={(checked) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        smsNotifications: checked,
+                      }))
+                    }
+                  />
                 </div>
               </div>
 
               <Separator />
 
-              {isLoading ? (
-                <div className="flex items-center justify-center gap-2">
-                  <LoaderCircle className="animate-spin" />
-                  <span>Loading...</span>
-                </div>
-              ) : (
-                <Button className="w-full" onClick={handleOnSubmit}>
-                  Save Changes
-                </Button>
-              )}
+              <Button
+                className="w-full"
+                onClick={handleOnSubmit}
+                disabled={
+                  isLoading || JSON.stringify(user) === JSON.stringify(formData)
+                }
+              >
+                {isLoading ? (
+                  <>
+                    <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save Changes"
+                )}
+              </Button>
             </div>
           </div>
         </div>

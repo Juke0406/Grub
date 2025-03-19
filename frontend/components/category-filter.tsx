@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { useMobile } from "@/hooks/use-mobile";
+import React from "react";
 
 interface Category {
   id: string;
@@ -23,7 +24,7 @@ export function CategoryFilter({
   const isMobile = useMobile();
 
   return (
-    <div className="max-w-[1600px] mx-auto bg-muted backdrop-blur-sm">
+    <div className="max-w-[1600px] mx-auto backdrop-blur-sm">
       <div
         className={`flex gap-3 overflow-x-auto py-3 no-scrollbar ${
           isMobile ? "" : "px-2"

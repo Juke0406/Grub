@@ -83,10 +83,6 @@ const userNavigation = [
         title: "History",
         url: "/reservations/history",
       },
-      {
-        title: "Rating History",
-        url: "/reservations/ratings",
-      },
     ],
   },
   {
@@ -98,10 +94,6 @@ const userNavigation = [
       {
         title: "Profile",
         url: "/settings/profile",
-      },
-      {
-        title: "Notifications",
-        url: "/settings/notifications",
       },
     ],
   },
