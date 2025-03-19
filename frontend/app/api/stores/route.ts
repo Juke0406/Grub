@@ -21,7 +21,7 @@ export async function GET() {
     const db = await getDatabase();
     const store = await db.collection("stores").findOne({ ownerId: userId });
 
-    return NextResponse.json(store);
+    return NextResponse.json({ store });
   } catch (error) {
     console.error("[STORES_GET]", error);
     return new NextResponse("Internal error", { status: 500 });

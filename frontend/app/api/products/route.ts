@@ -1,9 +1,9 @@
 // app/api/products/route.ts
-import { NextRequest, NextResponse } from "next/server";
-import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { getDatabase } from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
+import { headers } from "next/headers";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
   try {
@@ -15,37 +15,36 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const userId = session.user.id;
     const searchParams = request.nextUrl.searchParams;
-
-    // Extract query parameters with defaults
     const category = searchParams.get("category");
-    const userId = searchParams.get("userId");
     const limit = parseInt(searchParams.get("limit") || "20");
     const page = parseInt(searchParams.get("page") || "1");
     const skip = (page - 1) * limit;
 
-    // Build query object
-    const query: any = {};
+    const db = await getDatabase();
 
-    // Add filters if provided
+    // Find store by ownerId from session
+    const store = await db.collection("stores").findOne({ ownerId: userId });
+
+    if (!store) {
+      return NextResponse.json({ error: "Store not found" }, { status: 404 });
+    }
+
+    // Build query object with store ID
+    const query: any = { storeId: store._id.toString() };
+
+    // Add category filter if provided
     if (category) {
-      // Handle comma-separated categories
       const categories = category.split(",");
       query.category = { $in: categories };
     }
 
-    if (userId) {
-      query.userID = userId;
-    }
-
-    // Get database connection
-    const db = await getDatabase();
-    const collection = db.collection("products");
-
     // Execute query with pagination
+    const collection = db.collection("products");
     const products = await collection
       .find(query)
-      .sort({ expirationDate: 1 }) // Sort by expiration date (soonest first)
+      .sort({ "inventory.expirationDate": 1 }) // Sort by expiration date (soonest first)
       .skip(skip)
       .limit(limit)
       .toArray();
@@ -74,113 +73,78 @@ export async function GET(request: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const data = await req.json();
-    console.log("Received product data:", data);
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
 
-    // Helper to validate a single product payload
-    const validateProduct = (product: any): boolean => {
-      const {
-        SKU,
-        imageUrl,
-        name,
-        description,
-        originalPrice,
-        discountedPrice,
-        quantity,
-        category,
-        userID,
-        expirationDate,
-      } = product;
-      if (
-        !SKU ||
-        !imageUrl ||
-        !name ||
-        !description ||
-        originalPrice === undefined ||
-        discountedPrice === undefined ||
-        !quantity ||
-        !category ||
-        !userID ||
-        !expirationDate
-      ) {
-        return false;
-      }
-      return true;
-    };
-
-    // Prepare an array of documents to insert.
-    let docs: any[] = [];
-    if (Array.isArray(data)) {
-      for (const product of data) {
-        if (!validateProduct(product)) {
-          return NextResponse.json(
-            { error: "Missing required fields in one or more products" },
-            { status: 400 }
-          );
-        }
-        docs.push({
-          SKU: product.SKU,
-          imageUrl: product.imageUrl,
-          name: product.name,
-          description: product.description,
-          originalPrice: product.originalPrice,
-          discountedPrice: product.discountedPrice,
-          category: product.category,
-          userID: product.userID,
-          inventory: {
-            quantity: product.quantity,
-            expirationDate: product.expirationDate,
-          },
-          createdAt: new Date(),
-        });
-      }
-    } else {
-      // Handle a single product object.
-      if (!validateProduct(data)) {
-        return NextResponse.json(
-          { error: "Missing required fields" },
-          { status: 400 }
-        );
-      }
-      docs.push({
-        SKU: data.SKU,
-        imageUrl: data.imageUrl,
-        name: data.name,
-        description: data.description,
-        originalPrice: data.originalPrice,
-        discountedPrice: data.discountedPrice,
-        category: data.category,
-        userID: data.userID,
-        inventory: {
-          quantity: data.quantity,
-          expirationDate: data.expirationDate,
-        },
-        createdAt: new Date(),
-      });
+    if (!session || !session.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get the database instance using your getDatabase helper.
-    const db = await getDatabase();
-    const productsCollection = db.collection("products");
+    const userId = session.user.id;
+    const data = await req.json();
 
-    // Insert documents: use insertMany if multiple, else insertOne.
-    let insertResult;
-    if (docs.length > 1) {
-      insertResult = await productsCollection.insertMany(docs);
-      if (insertResult.insertedCount > 0) {
-        return NextResponse.json({
-          message: "Products created successfully!",
-          ids: insertResult.insertedIds,
-        });
-      }
-    } else {
-      insertResult = await productsCollection.insertOne(docs[0]);
-      if (insertResult.insertedId) {
-        return NextResponse.json({
-          message: "Product created successfully!",
-          id: insertResult.insertedId,
-        });
-      }
+    // Find user's store
+    const db = await getDatabase();
+    const store = await db.collection("stores").findOne({ ownerId: userId });
+
+    if (!store) {
+      return NextResponse.json({ error: "Store not found" }, { status: 404 });
+    }
+
+    // Validate product data
+    const {
+      SKU,
+      imageUrl,
+      name,
+      description,
+      originalPrice,
+      discountedPrice,
+      category,
+      inventory,
+    } = data;
+
+    if (
+      !SKU ||
+      !imageUrl ||
+      !name ||
+      !description ||
+      originalPrice === undefined ||
+      discountedPrice === undefined ||
+      !category ||
+      !inventory?.quantity ||
+      !inventory?.expirationDate
+    ) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
+    // Create product document
+    const doc = {
+      SKU,
+      imageUrl,
+      name,
+      description,
+      originalPrice,
+      discountedPrice,
+      category,
+      storeId: store._id.toString(),
+      inventory,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    // Insert document
+    const productsCollection = db.collection("products");
+    const result = await productsCollection.insertOne(doc);
+
+    if (result.insertedId) {
+      return NextResponse.json({
+        message: "Product created successfully!",
+        id: result.insertedId,
+      });
     }
 
     return NextResponse.json(
@@ -206,14 +170,39 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const userId = session.user.id;
     const { productId, quantityReserved } = await request.json();
 
     if (!productId || !quantityReserved) {
-      return NextResponse.json({ error: "Missing productId or quantityReserved" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Missing productId or quantityReserved" },
+        { status: 400 }
+      );
     }
 
     const db = await getDatabase();
+
+    // Find user's store
+    const store = await db.collection("stores").findOne({ ownerId: userId });
+
+    if (!store) {
+      return NextResponse.json({ error: "Store not found" }, { status: 404 });
+    }
+
     const productsCollection = db.collection("products");
+
+    // Check if product exists and belongs to user's store
+    const product = await productsCollection.findOne({
+      _id: new ObjectId(productId),
+      storeId: store._id.toString(),
+    });
+
+    if (!product) {
+      return NextResponse.json(
+        { error: "Product not found or unauthorized" },
+        { status: 404 }
+      );
+    }
 
     const result = await productsCollection.updateOne(
       { _id: new ObjectId(productId) },
@@ -223,11 +212,16 @@ export async function PATCH(request: NextRequest) {
     if (result.modifiedCount === 1) {
       return NextResponse.json({ message: "Stock updated successfully" });
     } else {
-      return NextResponse.json({ error: "Product not found or stock update failed" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Stock update failed" },
+        { status: 500 }
+      );
     }
   } catch (error) {
     console.error("Error updating stock:", error);
-    return NextResponse.json({ error: "Failed to update stock" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to update stock" },
+      { status: 500 }
+    );
   }
 }
-

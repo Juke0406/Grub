@@ -1,5 +1,6 @@
 "use client";
 
+import { Spinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -59,11 +60,15 @@ export default function StoreSettingsPage() {
   useEffect(() => {
     const fetchStore = async () => {
       try {
-        const response = await fetch("/api/stores");
+        const response = await fetch("/api/stores", {
+          credentials: "include",
+        });
         const data = await response.json();
-        if (data) {
-          setStore(data);
-          form.reset(data);
+        console.log("Store data:", data);
+        const storeData = data.store || data;
+        if (storeData) {
+          setStore(storeData);
+          form.reset(storeData);
         }
       } catch (error) {
         console.error("Error fetching store:", error);
@@ -79,6 +84,7 @@ export default function StoreSettingsPage() {
       setLoading(true);
       const method = store ? "PUT" : "POST";
       const response = await fetch("/api/stores", {
+        credentials: "include",
         method,
         headers: {
           "Content-Type": "application/json",
@@ -102,7 +108,7 @@ export default function StoreSettingsPage() {
   };
 
   if (isPending) {
-    return <div>Loading...</div>;
+    return <Spinner />;
   }
 
   return (

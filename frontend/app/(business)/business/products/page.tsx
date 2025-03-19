@@ -1,252 +1,592 @@
-"use client"; // This file is a client component so we can use state and event handlers
+"use client";
 
-import { useState, FormEvent } from 'react';
+import { authClient } from "@/lib/auth-client";
+import { cn } from "@/lib/utils";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { format } from "date-fns";
+import { Calendar as CalendarIcon, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+
+import { Spinner } from "@/components/spinner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Card } from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+
+const formSchema = z.object({
+  SKU: z.string().min(2, {
+    message: "SKU must be at least 2 characters.",
+  }),
+  imageUrl: z.string().url({
+    message: "Please enter a valid URL.",
+  }),
+  name: z.string().min(2, {
+    message: "Name must be at least 2 characters.",
+  }),
+  description: z.string().min(10, {
+    message: "Description must be at least 10 characters.",
+  }),
+  originalPrice: z
+    .string()
+    .refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
+      message: "Please enter a valid price greater than 0.",
+    }),
+  discountedPrice: z
+    .string()
+    .refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
+      message: "Please enter a valid discounted price (0 or greater).",
+    }),
+  quantity: z
+    .string()
+    .refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
+      message: "Please enter a valid quantity (0 or greater).",
+    }),
+  category: z.string().min(1, {
+    message: "Please select a category.",
+  }),
+  expirationDate: z.date({
+    required_error: "Please select an expiration date.",
+  }),
+});
 
 export default function ProductsPage() {
-  // State to hold form inputs with the new fields
-  const [formData, setFormData] = useState({
-    SKU: '',
-    imageUrl: '',
-    name: '',
-    description: '',
-    originalPrice: '',
-    discountedPrice: '',
-    quantity: '',
-    category: '',
-    userID: '',
-    expirationDate: '',
+  const { data: session, isPending } = authClient.useSession();
+  const [products, setProducts] = useState([]);
+  const [responseMessage, setResponseMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<any>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [storeId, setStoreId] = useState<string | null>(null);
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      SKU: "",
+      imageUrl: "",
+      name: "",
+      description: "",
+      originalPrice: "",
+      discountedPrice: "",
+      quantity: "",
+      category: "",
+    },
   });
 
-  // State to show a response message
-  const [responseMessage, setResponseMessage] = useState('');
-
-  // Handle form field changes
-  const handleChange = (
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = event.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  // Handle form submission
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    try {
-      const res = await fetch('/api/products', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          SKU: formData.SKU,
-          imageUrl: formData.imageUrl,
-          name: formData.name,
-          description: formData.description,
-          originalPrice: parseFloat(formData.originalPrice),
-          discountedPrice: parseFloat(formData.discountedPrice),
-          quantity: parseInt(formData.quantity, 10),
-          category: formData.category,
-          userID: formData.userID,
-          expirationDate: formData.expirationDate,
-        }),
-      });
-
-      if (!res.ok) {
-        throw new Error('Failed to create product');
+  useEffect(() => {
+    const fetchStoreId = async () => {
+      if (!session?.user?.id) {
+        console.error("No authenticated user found");
+        return;
       }
 
-      const data = await res.json();
-      setResponseMessage(data.message || 'Product created successfully!');
+      try {
+        const storeRes = await fetch("/api/stores");
+        const storeData = await storeRes.json();
 
-      // Optionally clear the form
-      setFormData({
-        SKU: '',
-        imageUrl: '',
-        name: '',
-        description: '',
-        originalPrice: '',
-        discountedPrice: '',
-        quantity: '',
-        category: '',
-        userID: '',
-        expirationDate: '',
-      });
+        if (storeData?.store?._id) {
+          setStoreId(storeData.store._id);
+          fetchProducts();
+        } else {
+          console.error("No store found in response:", storeData);
+        }
+      } catch (error) {
+        console.error("Error fetching store:", error);
+      }
+    };
+
+    if (!isPending && session) {
+      fetchStoreId();
+    }
+  }, [session, isPending]);
+
+  const fetchProducts = async () => {
+    try {
+      const res = await fetch("/api/products");
+      const data = await res.json();
+      setProducts(data.products || []);
     } catch (error) {
-      console.error(error);
-      setResponseMessage('Error creating product. Please try again.');
+      console.error("Error fetching products:", error);
     }
   };
 
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    try {
+      if (!storeId) {
+        setResponseMessage("Store not found. Please set up your store first.");
+        return;
+      }
+
+      setIsLoading(true);
+      setResponseMessage("");
+
+      const payload = {
+        ...values,
+        originalPrice: parseFloat(values.originalPrice),
+        discountedPrice: parseFloat(values.discountedPrice),
+        inventory: {
+          quantity: parseInt(values.quantity, 10),
+          expirationDate: values.expirationDate,
+        },
+      };
+
+      const method = editingProduct ? "PUT" : "POST";
+      const url = editingProduct
+        ? `/api/products/${editingProduct._id}`
+        : "/api/products";
+
+      const res = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to save product");
+      }
+
+      const data = await res.json();
+      setResponseMessage(
+        data.message ||
+          `Product ${editingProduct ? "updated" : "created"} successfully!`
+      );
+      form.reset();
+      setEditingProduct(null);
+      fetchProducts();
+    } catch (error) {
+      console.error(error);
+      setResponseMessage(
+        `Error ${
+          editingProduct ? "updating" : "creating"
+        } product. Please try again.`
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleEdit = (product: any) => {
+    setEditingProduct(product);
+    form.reset({
+      SKU: product.SKU,
+      imageUrl: product.imageUrl,
+      name: product.name,
+      description: product.description,
+      originalPrice: product.originalPrice.toString(),
+      discountedPrice: product.discountedPrice.toString(),
+      quantity: product.inventory.quantity.toString(),
+      category: product.category,
+      expirationDate: new Date(product.inventory.expirationDate),
+    });
+  };
+
+  const handleDelete = async (productId: string) => {
+    try {
+      setIsLoading(true);
+      const res = await fetch(`/api/products/${productId}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to delete product");
+      }
+
+      setResponseMessage("Product deleted successfully!");
+      setDeleteId(null);
+      fetchProducts();
+    } catch (error) {
+      console.error(error);
+      setResponseMessage("Error deleting product. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (isPending) {
+    return <Spinner />;
+  }
+
+  if (!session) {
+    return (
+      <div className="container py-6">
+        <Card className="p-6">
+          <h2 className="text-lg font-semibold mb-2">Not Authenticated</h2>
+          <p className="text-muted-foreground">
+            Please sign in to access product management.
+          </p>
+          <Button
+            className="mt-4"
+            onClick={() => (window.location.href = "/auth/signin")}
+          >
+            Sign In
+          </Button>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!storeId) {
+    return (
+      <div className="w-screen h-screen flex justify-center items-center">
+        <Card className="p-6">
+          <h2 className="text-lg font-semibold mb-2">Store Not Found</h2>
+          <p className="text-muted-foreground">
+            Please set up your store in the settings page before managing
+            products.
+          </p>
+          <Button
+            className="mt-4"
+            onClick={() => (window.location.href = "/business/settings/store")}
+          >
+            Go to Store Settings
+          </Button>
+        </Card>
+      </div>
+    );
+  }
+
   return (
-    <div className="container py-6">
-      <h1 className="text-2xl font-medium mb-6">Product Management</h1>
-      <p>
-        Add and manage your products, set prices, and update product details.
-        Create bundles and manage discounts for items nearing expiration.
-      </p>
+    <div className="container p-6">
+      <Tabs defaultValue="list" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="list">Products List</TabsTrigger>
+          <TabsTrigger value="create">Create Product</TabsTrigger>
+        </TabsList>
 
-      {/* --- Product Creation Form --- */}
-      <form onSubmit={handleSubmit} className="mt-6 space-y-4 max-w-md">
-        <div>
-          <label htmlFor="SKU" className="block mb-1 font-semibold">
-            SKU
-          </label>
-          <input
-            type="text"
-            id="SKU"
-            name="SKU"
-            value={formData.SKU}
-            onChange={handleChange}
-            required
-            className="w-full p-2 border rounded"
-          />
-        </div>
+        <TabsContent value="list" className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {products.map((product: any) => (
+              <Card key={product._id} className="p-4 relative group">
+                <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                  <div className="flex gap-2">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => {
+                        handleEdit(product);
+                        const tabButton = document.querySelector(
+                          '[value="create"]'
+                        ) as HTMLButtonElement;
+                        tabButton?.click();
+                      }}
+                    >
+                      Edit
+                    </Button>
+                    <AlertDialog
+                      open={deleteId === product._id}
+                      onOpenChange={(open) => !open && setDeleteId(null)}
+                    >
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => setDeleteId(product._id)}
+                        >
+                          Delete
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This action cannot be undone. This will permanently
+                            delete the product.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDelete(product._id)}
+                            className="bg-destructive hover:bg-destructive/90"
+                          >
+                            {isLoading ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              "Delete"
+                            )}
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                </div>
+                <div className="aspect-square relative mb-2">
+                  <img
+                    src={product.imageUrl}
+                    alt={product.name}
+                    className="object-cover rounded-md w-full h-full"
+                  />
+                </div>
+                <h3 className="font-semibold">{product.name}</h3>
+                <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
+                  {product.description}
+                </p>
+                <div className="flex items-center gap-2 mb-2">
+                  <Badge variant="secondary">{product.category}</Badge>
+                  <Badge variant="outline">SKU: {product.SKU}</Badge>
+                </div>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="text-sm line-through text-muted-foreground">
+                      ${product.originalPrice}
+                    </p>
+                    <p className="font-semibold text-lg">
+                      ${product.discountedPrice}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm text-muted-foreground">Quantity</p>
+                    <p className="font-medium">{product.inventory.quantity}</p>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
 
-        <div>
-          <label htmlFor="imageUrl" className="block mb-1 font-semibold">
-            Image URL
-          </label>
-          <input
-            type="text"
-            id="imageUrl"
-            name="imageUrl"
-            value={formData.imageUrl}
-            onChange={handleChange}
-            required
-            className="w-full p-2 border rounded"
-          />
-        </div>
+        <TabsContent value="create">
+          <Card>
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="p-4 space-y-4"
+              >
+                <div className="grid gap-4 md:grid-cols-2">
+                  <FormField
+                    control={form.control}
+                    name="SKU"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>SKU</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter SKU" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="imageUrl"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Image URL</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter image URL" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
-        <div>
-          <label htmlFor="name" className="block mb-1 font-semibold">
-            Product Name
-          </label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-            className="w-full p-2 border rounded"
-          />
-        </div>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Product Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter product name" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="category"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Category</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter category" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
-        <div>
-          <label htmlFor="description" className="block mb-1 font-semibold">
-            Description
-          </label>
-          <textarea
-            id="description"
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            required
-            className="w-full p-2 border rounded"
-          />
-        </div>
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Description</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Enter product description"
+                          className="resize-none"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-        <div>
-          <label htmlFor="originalPrice" className="block mb-1 font-semibold">
-            Original Price
-          </label>
-          <input
-            type="number"
-            step="0.01"
-            id="originalPrice"
-            name="originalPrice"
-            value={formData.originalPrice}
-            onChange={handleChange}
-            required
-            className="w-full p-2 border rounded"
-          />
-        </div>
+                <div className="grid gap-4 md:grid-cols-3">
+                  <FormField
+                    control={form.control}
+                    name="originalPrice"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Original Price</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            placeholder="0.00"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="discountedPrice"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Discounted Price</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            placeholder="0.00"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="quantity"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Quantity</FormLabel>
+                        <FormControl>
+                          <Input type="number" placeholder="0" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
-        <div>
-          <label htmlFor="discountedPrice" className="block mb-1 font-semibold">
-            Discounted Price
-          </label>
-          <input
-            type="number"
-            step="0.01"
-            id="discountedPrice"
-            name="discountedPrice"
-            value={formData.discountedPrice}
-            onChange={handleChange}
-            required
-            className="w-full p-2 border rounded"
-          />
-        </div>
+                <FormField
+                  control={form.control}
+                  name="expirationDate"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel>Expiration Date</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant={"outline"}
+                              className={cn(
+                                "w-[240px] pl-3 text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value ? (
+                                format(field.value, "PPP")
+                              ) : (
+                                <span>Pick a date</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={(date) =>
+                              date < new Date() || date > new Date("2025-01-01")
+                            }
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-        <div>
-          <label htmlFor="quantity" className="block mb-1 font-semibold">
-            Quantity
-          </label>
-          <input
-            type="number"
-            id="quantity"
-            name="quantity"
-            value={formData.quantity}
-            onChange={handleChange}
-            required
-            className="w-full p-2 border rounded"
-          />
-        </div>
-
-        <div>
-          <label htmlFor="category" className="block mb-1 font-semibold">
-            Category
-          </label>
-          <input
-            type="text"
-            id="category"
-            name="category"
-            value={formData.category}
-            onChange={handleChange}
-            required
-            className="w-full p-2 border rounded"
-          />
-        </div>
-
-        <div>
-          <label htmlFor="userID" className="block mb-1 font-semibold">
-            User ID
-          </label>
-          <input
-            type="text"
-            id="userID"
-            name="userID"
-            value={formData.userID}
-            onChange={handleChange}
-            required
-            className="w-full p-2 border rounded"
-          />
-        </div>
-
-        <div>
-          <label htmlFor="expirationDate" className="block mb-1 font-semibold">
-            Expiration Date
-          </label>
-          <input
-            type="date"
-            id="expirationDate"
-            name="expirationDate"
-            value={formData.expirationDate}
-            onChange={handleChange}
-            required
-            className="w-full p-2 border rounded"
-          />
-        </div>
-
-        <button
-          type="submit"
-          className="px-4 py-2 bg-blue-600 text-white font-semibold rounded hover:bg-blue-700"
-        >
-          Create Product
-        </button>
-      </form>
+                <div className="flex gap-2">
+                  <Button type="submit" className="flex-1" disabled={isLoading}>
+                    {isLoading ? (
+                      <span className="flex items-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Saving...
+                      </span>
+                    ) : editingProduct ? (
+                      "Update Product"
+                    ) : (
+                      "Create Product"
+                    )}
+                  </Button>
+                  {editingProduct && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        setEditingProduct(null);
+                        form.reset();
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  )}
+                </div>
+              </form>
+            </Form>
+          </Card>
+        </TabsContent>
+      </Tabs>
 
       {responseMessage && (
-        <p className="mt-4 font-semibold">{responseMessage}</p>
+        <p className="mt-4 text-sm font-medium text-green-600">
+          {responseMessage}
+        </p>
       )}
     </div>
   );

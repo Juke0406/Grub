@@ -107,16 +107,8 @@ const businessNavigation = [
     isActive: true,
     items: [
       {
-        title: "Dashboard",
-        url: "/business/dashboard",
-      },
-      {
         title: "Products",
         url: "/business/products",
-      },
-      {
-        title: "Inventory",
-        url: "/business/inventory",
       },
       {
         title: "Orders",

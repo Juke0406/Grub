@@ -1,7 +1,5 @@
-
 "use client";
 
-import { CodeBlock } from "@/components/code-block";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,8 +19,8 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Copy, Key, Plus, Trash2 } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
 
 import {
   APIKey,
@@ -33,6 +31,7 @@ import {
 
 import { authClient } from "@/lib/auth-client";
 
+import { Spinner } from "@/components/spinner";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { coy } from "react-syntax-highlighter/dist/esm/styles/prism";
 
@@ -139,38 +138,11 @@ deleteItem();`,
 const REQUEST_COST = 0.05; // cost per request in USD
 const REQUEST_QUOTA = 100; // Example quota
 
-const Spinner = () => (
-    <div className="bg-white w-full h-full p-6 rounded shadow-lg flex flex-col justify-center items-center gap-3">
-      <svg
-        className="animate-spin h-6 w-6 text-indigo-500"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-      >
-        <circle
-          className="opacity-25"
-          cx="12"
-          cy="12"
-          r="10"
-          stroke="currentColor"
-          strokeWidth="4"
-        ></circle>
-        <path
-          className="opacity-75"
-          fill="currentColor"
-          d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-        ></path>
-      </svg>
-      <p className="text-sm font-medium text-gray-800">Loading...</p>
-    </div>
-);
-
 export default function BusinessDashboard() {
   const [userId, setUserId] = useState<string | null>(null);
   const [apiKeys, setApiKeys] = useState<APIKey[]>([]);
   const [totalRequests, setTotalRequests] = useState<number>(0);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
   const pathname = usePathname();
   const [creatingKey, setCreatingKey] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -200,8 +172,11 @@ export default function BusinessDashboard() {
         console.log("Fetching API keys for userId:", userId); // Log userId
         const keys = await getApiKeys(userId);
         setApiKeys(keys);
-        console.log(keys)
-        const totalUsage = keys.reduce((sum: number, key: APIKey) => sum + (key.usageCount || 0), 0);
+        console.log(keys);
+        const totalUsage = keys.reduce(
+          (sum: number, key: APIKey) => sum + (key.usageCount || 0),
+          0
+        );
         setTotalRequests(totalUsage);
         console.log(totalUsage);
       } catch (error) {
@@ -216,8 +191,10 @@ export default function BusinessDashboard() {
     setCreatingKey(true); // Show loader/modal
 
     try {
-      const { key, id, created_at, expiresAt, usageCount } = await createApiKey(userId);
-      console.log("New API Key:", key)
+      const { key, id, created_at, expiresAt, usageCount } = await createApiKey(
+        userId
+      );
+      console.log("New API Key:", key);
       setApiKeys((prevKeys) => [
         ...prevKeys,
         {
@@ -231,7 +208,6 @@ export default function BusinessDashboard() {
       ]);
       setShowSuccess(true); // Show success message
       setTimeout(() => setShowSuccess(false), 3000); // Hide success message after 3 seconds
-
     } catch (error) {
       console.error("Error creating API key:", error);
     } finally {
@@ -262,13 +238,6 @@ export default function BusinessDashboard() {
   return (
     <div className="overflow-x-hidden">
       <div className="max-w-[calc(100vw-2rem)] mx-auto p-6 flex flex-col gap-4">
-        <div className="mb-8">
-          <h1 className="text-3xl font-semibold">API Management</h1>
-          <p className="text-muted-foreground mt-2">
-            Manage your API keys and monitor usage
-          </p>
-        </div>
-
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           <Card>
             <CardHeader>
@@ -301,9 +270,7 @@ export default function BusinessDashboard() {
               <CardDescription>Based on usage this month</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
-                ${currentCost}
-              </div>
+              <div className="text-2xl font-bold">${currentCost}</div>
               <p className="text-xs text-muted-foreground">
                 ${REQUEST_COST} per request
               </p>
@@ -421,9 +388,7 @@ export default function BusinessDashboard() {
         <Card>
           <CardHeader>
             <CardTitle>API Documentation</CardTitle>
-            <CardDescription>
-              Examples of how to use the API
-            </CardDescription>
+            <CardDescription>Examples of how to use the API</CardDescription>
           </CardHeader>
           <CardContent>
             <Alert>

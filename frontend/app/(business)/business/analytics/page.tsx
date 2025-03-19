@@ -1,16 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
-  BarChart,
   Bar,
-  XAxis,
-  YAxis,
+  BarChart,
   CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
   Cell,
   Legend,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
 } from "recharts";
 
 interface Prediction {
@@ -90,14 +90,7 @@ export default function AnalyticsPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-6">
-      <h1 className="text-3xl font-bold mb-4">Business Analytics</h1>
-      <p className="text-gray-700 mb-6">
-        View detailed analytics about your business performance, including sales
-        trends, popular items, and food waste reduction metrics. Get insights to
-        optimize your inventory and pricing strategies.
-      </p>
-
+    <div className="container LLp-8">
       {loading ? (
         <p className="text-gray-600">Loading predictions...</p>
       ) : error ? (
