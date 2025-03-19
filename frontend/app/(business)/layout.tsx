@@ -1,21 +1,28 @@
-"use client";
-
-import { usePortalStore } from "@/lib/store";
+import { auth } from "@/lib/auth";
+import { createDefaultStore } from "@/lib/store-utils";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { useEffect } from "react";
+import React from "react";
 
-export default function AdminLayout({
+export default async function BusinessLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const portal = usePortalStore((state) => state.currentPortal);
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
 
-  useEffect(() => {
-    if (portal !== "business") {
-      redirect("/");
-    }
-  }, [portal]);
+  if (!session) {
+    console.log("[BusinessLayout] Invalid session");
+    redirect("/login");
+  }
+
+  try {
+    await createDefaultStore(session.user.id);
+  } catch (error) {
+    console.error("[BusinessLayout] Error creating default store:", error);
+  }
 
   return <>{children}</>;
 }

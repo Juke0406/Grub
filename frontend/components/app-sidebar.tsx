@@ -107,16 +107,16 @@ const businessNavigation = [
     isActive: true,
     items: [
       {
-        title: "API Management",
-        url: "/business",
-      },
-      {
-        title: "Inventory",
-        url: "/business/inventory",
+        title: "Dashboard",
+        url: "/business/dashboard",
       },
       {
         title: "Products",
         url: "/business/products",
+      },
+      {
+        title: "Inventory",
+        url: "/business/inventory",
       },
       {
         title: "Orders",
@@ -146,13 +146,17 @@ const businessNavigation = [
   },
   {
     title: "Settings",
-    url: "/settings",
+    url: "/business/settings/store",
     icon: Settings2,
     isActive: true,
     items: [
       {
         title: "Store Profile",
-        url: "/settings/store",
+        url: "/business/settings/store",
+      },
+      {
+        title: "API Keys",
+        url: "/business",
       },
     ],
   },

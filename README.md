@@ -38,8 +38,6 @@ The application serves three main user types:
 - TypeScript
 - TailwindCSS
 - Shadcn/ui Components
-- React Query
-- Zustand (State Management)
 
 ### Backend Infrastructure
 
