@@ -50,6 +50,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/browse/all", request.url));
   }
 
+  // Redirect /business to /business/products
+  if (path === "/business") {
+    return NextResponse.redirect(new URL("/business/products", request.url));
+  }
+
   // Common paths accessible in both portals
   if (path === "/" || path === "/support" || path === "/feedback") {
     return NextResponse.next();

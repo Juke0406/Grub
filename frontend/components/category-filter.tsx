@@ -2,22 +2,32 @@
 
 import { Button } from "@/components/ui/button";
 import { useMobile } from "@/hooks/use-mobile";
-import React from "react";
+import {
+  BaggageClaim,
+  ChefHat,
+  Cookie,
+  LayoutGrid,
+  Milk,
+  Pizza,
+  Wheat,
+} from "lucide-react";
 
-interface Category {
-  id: string;
-  name: string;
-  icon?: React.ReactNode;
-}
+export const PRODUCT_CATEGORIES = [
+  { id: "all", name: "All Products", icon: <LayoutGrid className="h-4 w-4" /> },
+  { id: "bread", name: "Bread", icon: <Wheat className="h-4 w-4" /> },
+  { id: "pastries", name: "Pastries", icon: <Cookie className="h-4 w-4" /> },
+  { id: "meat", name: "Meat", icon: <ChefHat className="h-4 w-4" /> },
+  { id: "dairy", name: "Dairy", icon: <Milk className="h-4 w-4" /> },
+  { id: "produce", name: "Produce", icon: <Pizza className="h-4 w-4" /> },
+  { id: "others", name: "Others", icon: <BaggageClaim className="h-4 w-4" /> },
+] as const;
 
 interface CategoryFilterProps {
-  categories: Category[];
   activeCategory?: string;
   onCategoryChange: (categoryId: string) => void;
 }
 
 export function CategoryFilter({
-  categories,
   activeCategory,
   onCategoryChange,
 }: CategoryFilterProps) {
@@ -30,7 +40,7 @@ export function CategoryFilter({
           isMobile ? "" : "px-2"
         }`}
       >
-        {categories.map((category) => (
+        {PRODUCT_CATEGORIES.map((category) => (
           <Button
             key={category.id}
             variant={activeCategory === category.id ? "default" : "outline"}
@@ -47,18 +57,10 @@ export function CategoryFilter({
             `}
             onClick={() => onCategoryChange(category.id)}
           >
-            {category.icon && (
-              <span
-                className={`mr-2 transition-transform duration-300 ${
-                  activeCategory === category.id
-                    ? "text-white"
-                    : "text-muted-foreground/70 group-hover:text-primary"
-                }`}
-              >
-                {category.icon}
-              </span>
-            )}
-            {category.name}
+            <span className="flex items-center gap-2">
+              {category.icon}
+              {category.name}
+            </span>
           </Button>
         ))}
       </div>

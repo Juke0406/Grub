@@ -148,7 +148,7 @@ const businessNavigation = [
       },
       {
         title: "API Keys",
-        url: "/business",
+        url: "/business/api",
       },
     ],
   },

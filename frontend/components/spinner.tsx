@@ -1,5 +1,5 @@
 export const Spinner = () => (
-  <div className="bg-white w-full h-full p-6 rounded shadow-lg flex flex-col justify-center items-center gap-3">
+  <div className="w-full h-full p-6 rounded-xl shadow-lg flex flex-col justify-center items-center gap-3">
     <svg
       className="animate-spin h-6 w-6 text-indigo-500"
       xmlns="http://www.w3.org/2000/svg"

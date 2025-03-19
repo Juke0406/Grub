@@ -6,21 +6,22 @@ import { SearchHeader } from "@/components/search-header";
 import { useMobile } from "@/hooks/use-mobile";
 import data from "@/lib/data.json";
 import { cn } from "@/lib/utils";
-import { Beef, Coffee, Pizza, ShoppingBag, Soup } from "lucide-react";
 import { useEffect, useState } from "react";
 
-const categories = [
-  { id: "all", name: "All Items", icon: <ShoppingBag className="h-4 w-4" /> },
-  {
-    id: "mystery",
-    name: "Mystery Bags",
-    icon: <ShoppingBag className="h-4 w-4" />,
-  },
-  { id: "bread", name: "Bread", icon: <Pizza className="h-4 w-4" /> },
-  { id: "pastries", name: "Pastries", icon: <Coffee className="h-4 w-4" /> },
-  { id: "produce", name: "Produce", icon: <Soup className="h-4 w-4" /> },
-  { id: "meat", name: "Meat", icon: <Beef className="h-4 w-4" /> },
-];
+interface Item {
+  id: string;
+  name: string;
+  shop: string;
+  type: string;
+  category: string;
+  originalPrice: number;
+  discountedPrice: number;
+  image: string;
+  distance: number;
+  rating: number;
+  availableUntil: string;
+  quantity: number;
+}
 
 // Transform data from bakeries and supermarkets into a unified format
 const transformedItems = [
@@ -71,7 +72,7 @@ export default function BrowseAllPage() {
         const transformed = data.products.map((product: any) => ({
           id: product._id,
           name: product.name,
-          shop: product.userID,
+          shop: product.storeId || "Unknown Store",
           type: product.category, // assuming "type" = category
           category: product.category,
           originalPrice: product.originalPrice,
@@ -106,7 +107,8 @@ export default function BrowseAllPage() {
     const matchesSearch =
       searchQuery === "" ||
       item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.shop.toLowerCase().includes(searchQuery.toLowerCase());
+      (item.shop &&
+        item.shop.toLowerCase().includes(searchQuery.toLowerCase()));
     return matchesCategory && matchesSearch;
   });
 
@@ -138,7 +140,6 @@ export default function BrowseAllPage() {
         />
         <div className={isMobile ? "px-4" : "px-8 py-2"}>
           <CategoryFilter
-            categories={categories}
             activeCategory={activeCategory}
             onCategoryChange={setActiveCategory}
           />
@@ -188,7 +189,7 @@ export default function BrowseAllPage() {
                   const transformed = data.products.map((product: any) => ({
                     id: product._id,
                     name: product.name,
-                    shop: product.userID,
+                    shop: product.storeId || "Unknown Store",
                     type: product.category,
                     category: product.category,
                     originalPrice: product.originalPrice,
