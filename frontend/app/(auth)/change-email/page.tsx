@@ -8,6 +8,7 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { CheckCircleIcon } from "lucide-react";
+import Link from "next/link";
 import React, { useEffect } from "react";
 
 const EmailVerifiedPage: React.FC = () => {
@@ -32,7 +33,7 @@ const EmailVerifiedPage: React.FC = () => {
         </CardContent>
         <CardFooter className="flex justify-center">
           <Button asChild>
-            <a href="/browse/all">Back to Home Page</a>
+            <Link href="/browse/all">Back to Home Page</Link>
           </Button>
         </CardFooter>
       </Card>
