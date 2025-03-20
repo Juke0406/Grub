@@ -43,6 +43,7 @@ import {
 } from "@/components/ui/popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { Toaster, toast } from "sonner";
 
 const formSchema = z.object({
   SKU: z.string().min(2, {
@@ -88,7 +89,6 @@ const categories = [
 export default function ProductsPage() {
   const { data: session, isPending } = authClient.useSession();
   const [products, setProducts] = useState<any[]>([]);
-  const [responseMessage, setResponseMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -211,12 +211,11 @@ export default function ProductsPage() {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       if (!storeId && !isStoreLoading) {
-        setResponseMessage("Store not found. Please set up your store first.");
+        toast.error("Store not found. Please set up your store first.");
         return;
       }
 
       setIsLoading(true);
-      setResponseMessage("");
 
       const payload = {
         ...values,
@@ -246,7 +245,7 @@ export default function ProductsPage() {
       }
 
       const data = await res.json();
-      setResponseMessage(
+      toast.success(
         data.message ||
           `Product ${editingProduct ? "updated" : "created"} successfully!`
       );
@@ -255,7 +254,7 @@ export default function ProductsPage() {
       fetchProducts(1, true);
     } catch (error) {
       console.error(error);
-      setResponseMessage(
+      toast.error(
         `Error ${
           editingProduct ? "updating" : "creating"
         } product. Please try again.`
@@ -291,12 +290,12 @@ export default function ProductsPage() {
         throw new Error("Failed to delete product");
       }
 
-      setResponseMessage("Product deleted successfully!");
+      toast.success("Product deleted successfully!");
       setDeleteId(null);
       fetchProducts(1, true);
     } catch (error) {
       console.error(error);
-      setResponseMessage("Error deleting product. Please try again.");
+      toast.error("Error deleting product. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -409,13 +408,13 @@ export default function ProductsPage() {
                           throw new Error("Failed to seed products");
                         }
                         const data = await res.json();
-                        setResponseMessage(
+                        toast.success(
                           `Successfully seeded ${data.count} products`
                         );
                         fetchProducts(1, true);
                       } catch (error) {
                         console.error(error);
-                        setResponseMessage(
+                        toast.error(
                           "Error seeding products. Please try again."
                         );
                       } finally {
@@ -779,7 +778,7 @@ export default function ProductsPage() {
                           throw new Error("Failed to seed products");
                         }
                         const data = await res.json();
-                        setResponseMessage(
+                        toast.success(
                           `Successfully seeded ${data.count} products`
                         );
                         fetchProducts(1, true);
@@ -789,7 +788,7 @@ export default function ProductsPage() {
                         listTab?.click();
                       } catch (error) {
                         console.error(error);
-                        setResponseMessage(
+                        toast.error(
                           "Error seeding products. Please try again."
                         );
                       } finally {
@@ -814,11 +813,7 @@ export default function ProductsPage() {
         </TabsContent>
       </Tabs>
 
-      {responseMessage && (
-        <p className="mt-4 text-sm font-medium text-green-600">
-          {responseMessage}
-        </p>
-      )}
+      <Toaster />
     </div>
   );
 }
