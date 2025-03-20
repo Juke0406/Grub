@@ -61,7 +61,7 @@ export function ReservationCard({
 
   return (
     <>
-      <Card className="flex flex-col overflow-hidden">
+      <Card className="flex flex-col overflow-hidden py-0 gap-0">
         <div className="relative h-48 bg-gray-100">
           {reservation.storeImage ? (
             <Image
