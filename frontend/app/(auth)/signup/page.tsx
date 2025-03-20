@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import { LoaderCircle } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { toast } from "sonner";
@@ -126,9 +127,9 @@ export default function SignUpPage({
                   </Button>
                   <div className="text-center text-sm">
                     Already have an account?{" "}
-                    <a href="login" className="underline underline-offset-4">
+                    <Link href="login" className="underline underline-offset-4">
                       Login
-                    </a>
+                    </Link>
                   </div>
                 </div>
               </form>
@@ -143,7 +144,8 @@ export default function SignUpPage({
           </Card>
           <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
             By clicking continue, you agree to our{" "}
-            <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+            <Link href="#">Terms of Service</Link> and{" "}
+            <Link href="#">Privacy Policy</Link>.
           </div>
         </div>
       </div>
