@@ -1,39 +1,33 @@
-import { getSessionCookie } from "better-auth/cookies";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
-  const path = request.nextUrl.pathname;
-  const sessionCookie = getSessionCookie(request);
+  // const path = request.nextUrl.pathname;
+  // const sessionCookie = getSessionCookie(request);
 
-  if (!sessionCookie) {
-    if (
-      path === "/login" ||
-      path === "/signup" ||
-      path === "/" ||
-      path === "/forget-password" ||
-      path === "/reset-password" ||
-      path === "/email-verified" ||
-      path === "/change-email"
-    ) {
-      return NextResponse.next();
-    }
-    return NextResponse.redirect(new URL("/login", request.url));
-  }
+  // if (!sessionCookie) {
+  //   if (
+  //     path === "/login" ||
+  //     path === "/signup" ||
+  //     path === "/" ||
+  //     path === "/forget-password" ||
+  //     path === "/reset-password" ||
+  //     path === "/email-verified" ||
+  //     path === "/change-email"
+  //   ) {
+  //     return NextResponse.next();
+  //   }
+  //   return NextResponse.redirect(new URL("/login", request.url));
+  // }
 
   // Redirect /browse to /browse/all
-  if (path === "/browse") {
-    return NextResponse.redirect(new URL("/browse/all", request.url));
-  }
+  // if (path === "/browse") {
+  //   return NextResponse.redirect(new URL("/browse/all", request.url));
+  // }
 
-  // Redirect /business to /business/products
-  if (path === "/business") {
-    return NextResponse.redirect(new URL("/business/products", request.url));
-  }
-
-  // Common paths accessible in both portals
-  if (path === "/" || path === "/support" || path === "/feedback") {
-    return NextResponse.next();
-  }
+  // // Redirect /business to /business/products
+  // if (path === "/business") {
+  //   return NextResponse.redirect(new URL("/business/products", request.url));
+  // }
 
   return NextResponse.next();
 }
