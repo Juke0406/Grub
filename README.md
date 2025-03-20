@@ -40,6 +40,11 @@ The application serves three main user types:
 - TypeScript
 - TailwindCSS
 - Shadcn/ui Components
+- Better Auth for authentication
+- Progressive Web App (PWA) support with offline functionality
+- Mobile-responsive design with custom hooks
+- MongoDB integration for data persistence
+- Server-side rendering and static optimization
 
 ### Backend Infrastructure
 
@@ -202,6 +207,11 @@ graph TD
 - View discounted prices and pickup windows
 - Reputation system tracking pickup reliability
 - Active reservation management
+- Mobile app installation prompt
+- Offline access to reservations
+- Real-time availability updates
+- Category-based filtering
+- Location-based store discovery
 
 ### For Bakeries
 
@@ -233,24 +243,13 @@ graph TD
 ```mermaid
 graph TD
     Root[grub/]
-    Frontend[frontend/]
-    Services[services/]
-    Infra[infrastructure/]
-    Docs[docs/]
-    Side[side_application/]
+    Services[src/services/]
+    Side[src/side_application/]
 
-    Root --> Frontend
     Root --> Services
-    Root --> Infra
-    Root --> Docs
     Root --> Side
 
-    Frontend --> App[app/]
-    Frontend --> Comp[components/]
-    Frontend --> Hooks[hooks/]
-    Frontend --> Lib[lib/]
-    Frontend --> Public[public/]
-
+    Services --> Frontend[frontend-service/]
     Services --> Auth[auth-service/]
     Services --> Res[reservation-service/]
     Services --> List[listing-service/]
@@ -259,42 +258,38 @@ graph TD
     Services --> ML[ml-service/]
     Services --> API[api-service/]
 
-    Infra --> Envoy[envoy/]
-    Infra --> Kafka[kafka/]
-    Infra --> Redis[redis/]
-    Infra --> K8s[kubernetes/]
+    Frontend --> App[app/]
+    Frontend --> Comp[components/]
+    Frontend --> Hooks[hooks/]
+    Frontend --> Types[types/]
+    Frontend --> Services2[services/]
+    Frontend --> Public[public/]
 
     style Root fill:#f96,stroke:#333
-    style Frontend fill:#f9f,stroke:#333
     style Services fill:#9cf,stroke:#333
-    style Infra fill:#ff9,stroke:#333
-    style Docs fill:#9f9,stroke:#333
     style Side fill:#f69,stroke:#333
+    style Frontend fill:#f9f,stroke:#333
 ```
 
 ```bash
 grub/
-├── frontend/                 # Next.js frontend application
-│   ├── app/                 # App router pages
-│   ├── components/          # Reusable React components
-│   ├── hooks/              # Custom React hooks
-│   ├── lib/                # Utility functions and store
-│   └── public/             # Static assets
-├── services/
-│   ├── auth-service/       # Authentication microservice
-│   ├── reservation-service/# Reservation management
-│   ├── listing-service/    # Product listing and management
-│   ├── prediction-service/ # Demand prediction and analytics
-│   ├── creation-service/   # Product/bundle creation with validation
-│   ├── ml-service/        # Machine learning algorithms with health monitoring
-│   └── api-service/       # API gateway and management
-├── infrastructure/
-│   ├── envoy/             # Service mesh configuration
-│   ├── kafka/             # Event streaming setup
-│   ├── redis/             # Caching layer
-│   └── kubernetes/        # K8s deployment configs
-├── side_application/      # Demo client application for business integration
-└── docs/                  # Documentation
+└── src/
+    ├── services/           # Microservices
+    │   ├── frontend-service/    # Next.js frontend application
+    │   │   ├── app/            # App router pages with auth, business, landing, user routes
+    │   │   ├── components/     # React components including UI and business logic
+    │   │   ├── hooks/         # Custom React hooks
+    │   │   ├── types/         # TypeScript type definitions
+    │   │   ├── services/      # API service integrations
+    │   │   └── public/        # Static assets and PWA files
+    │   ├── auth-service/      # Authentication microservice
+    │   ├── reservation-service/# Reservation management
+    │   ├── listing-service/   # Product listing and management
+    │   ├── prediction-service/# Demand prediction and analytics
+    │   ├── creation-service/  # Product/bundle creation with validation
+    │   ├── ml-service/       # Machine learning algorithms with health monitoring
+    │   └── api-service/      # API gateway and management
+    └── side_application/     # Python demo client for business integration
 ```
 
 ## Setup Instructions
@@ -319,7 +314,7 @@ grub/
 2. Install frontend dependencies
 
    ```bash
-   cd frontend
+   cd src/services/frontend-service
    pnpm install
    ```
 
@@ -327,42 +322,36 @@ grub/
 
    ```bash
    # Frontend
-   cp frontend/.env.example frontend/.env.local
+   cp src/services/frontend-service/.env.example src/services/frontend-service/.env.local
 
    # Services
-   cp services/auth-service/.env.example services/auth-service/.env
-   cp services/reservation-service/.env.example services/reservation-service/.env
-   cp services/creation-service/.env.example services/creation-service/.env
-   cp services/listing-service/.env.example services/listing-service/.env
-   cp services/prediction-service/.env.example services/prediction-service/.env
+   cp src/services/auth-service/.env.example src/services/auth-service/.env
+   cp src/services/reservation-service/.env.example src/services/reservation-service/.env
+   cp src/services/creation-service/.env.example src/services/creation-service/.env
+   cp src/services/listing-service/.env.example src/services/listing-service/.env
+   cp src/services/prediction-service/.env.example src/services/prediction-service/.env
    # ... repeat for other services
    ```
 
 4. Start infrastructure services
 
    ```bash
-   docker compose -f infrastructure/docker-compose.yml up -d
+   docker compose -f src/services/docker-compose.yml up -d
    ```
 
-5. Deploy microservices (development)
+5. Run the frontend development server
 
    ```bash
-   kubectl apply -f infrastructure/kubernetes/dev/
-   ```
-
-6. Run the frontend development server
-
-   ```bash
-   cd frontend
+   cd src/services/frontend-service
    pnpm dev
    ```
 
-7. Set up the side application (optional)
+6. Set up the side application (optional)
 
    ```bash
-   cd side_application
+   cd src/side_application
    python3 -m venv ./venv
-   source ./venv/bin/activate
+   source ./venv/bin/activate  # On Windows: .\venv\Scripts\activate
    pip install -r requirements.txt
    python3 main.py
    ```
@@ -529,6 +518,10 @@ The side application demonstrates how business clients can integrate with GRUB:
 - Implement atomic design principles
 - Create reusable components in `components/`
 - Place page-specific components within their page directories
+- Separate business logic into dedicated service layers
+- Type-safe API integrations with custom hooks
+- Mobile-first responsive components
+- PWA components for offline support
 
 ### State Management
 
@@ -550,7 +543,7 @@ The side application demonstrates how business clients can integrate with GRUB:
 ### Frontend Testing
 
 ```bash
-cd frontend
+cd src/services/frontend-service
 pnpm test        # Run unit tests
 pnpm test:e2e   # Run end-to-end tests
 ```
@@ -559,16 +552,12 @@ pnpm test:e2e   # Run end-to-end tests
 
 ```bash
 # Run tests for individual services
-cd services/auth-service
+cd src/services/auth-service
 pnpm test
 
-cd services/reservation-service
+cd src/services/reservation-service
 pnpm test
 # ... repeat for other services
-
-# Run integration tests
-cd infrastructure
-./run-integration-tests.sh
 ```
 
 ### Load Testing
