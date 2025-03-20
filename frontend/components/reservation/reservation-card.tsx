@@ -108,10 +108,12 @@ export function ReservationCard({
                   <MapPin className="w-4 h-4" />
                   <span>{reservation.storeLocation}</span>
                 </div>
-                <div className="flex items-center gap-1 text-blue-600">
-                  <Navigation className="w-4 h-4" />
-                  <span>{(Math.random() * 3 + 0.5).toFixed(1)} km</span>
-                </div>
+                {reservation.status !== "completed" && (
+                  <div className="flex items-center gap-1 text-blue-600">
+                    <Navigation className="w-4 h-4" />
+                    <span>{(Math.random() * 3 + 0.5).toFixed(1)} km</span>
+                  </div>
+                )}
               </div>
             </div>
             <Badge className={status.color}>{status.label}</Badge>
@@ -196,12 +198,14 @@ export function ReservationCard({
           </div>
 
           <div className="flex flex-wrap gap-2 mt-4 pt-4">
-            <Button
-              className="flex-1 min-w-[180px]"
-              onClick={() => setDirectionsOpen(true)}
-            >
-              Get Directions
-            </Button>
+            {reservation.status !== "completed" && (
+              <Button
+                className="flex-1 min-w-[180px]"
+                onClick={() => setDirectionsOpen(true)}
+              >
+                Get Directions
+              </Button>
+            )}
             {reservation.status === "ready" && (
               <Button
                 variant="default"

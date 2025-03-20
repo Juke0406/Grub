@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useMobile } from "@/hooks/use-mobile";
 import { useReservations } from "@/hooks/use-reservations";
 import { Reservation } from "@/types/reservation";
+import { ForkKnife } from "lucide-react";
 import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -58,6 +59,7 @@ export default function ActiveReservationsPage() {
             ) : (
               // Show message if no reservations
               <div className="col-span-full text-center py-12">
+                <ForkKnife className="mx-auto h-12 w-12 text-gray-400" />
                 <h3 className="text-lg font-medium text-gray-500">
                   No active reservations
                 </h3>

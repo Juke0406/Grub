@@ -1,6 +1,6 @@
 "use client";
 
-import { CancelledReservationCard } from "@/components/reservation/reservation-cancelled-card";
+import { ReservationCard } from "@/components/reservation/reservation-card";
 import { ReservationSkeleton } from "@/components/reservation/reservation-skeleton";
 import { Button } from "@/components/ui/button";
 import { useMobile } from "@/hooks/use-mobile";
@@ -49,7 +49,7 @@ export default function HistoryPage() {
             ) : localReservations.length > 0 ? (
               // Show reservations if available
               localReservations.map((reservation) => (
-                <CancelledReservationCard
+                <ReservationCard
                   key={reservation._id}
                   reservation={reservation}
                   onDelete={handleDelete}
