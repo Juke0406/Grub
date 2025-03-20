@@ -1,3 +1,4 @@
+import { PWAInstallPrompt } from "@/components/pwa-prompt";
 import { Inter } from "next/font/google";
 import React from "react";
 import "./globals.css";
@@ -16,6 +17,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
+        <PWAInstallPrompt />
         <AppProvider>{children}</AppProvider>
       </body>
     </html>

@@ -2,7 +2,6 @@
 
 import { AppSidebar } from "@/components/app-sidebar";
 import { MobileNav } from "@/components/mobile-nav";
-import { PWAInstallPrompt } from "@/components/pwa-prompt";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { useMobile } from "@/hooks/use-mobile";
 import { usePathname } from "next/navigation";
@@ -28,7 +27,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <SidebarProvider>
-      <PWAInstallPrompt />
       <Toaster />
       <AppSidebar />
       <SidebarInset>
