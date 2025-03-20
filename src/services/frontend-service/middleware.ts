@@ -1,7 +1,7 @@
 import { getSessionCookie } from "better-auth/cookies";
 import { NextResponse, type NextRequest } from "next/server";
 
-// Specify Edge Runtime
+// Use standard edge runtime
 export const runtime = "experimental-edge";
 
 // Paths that should only be accessible in business portal
@@ -83,7 +83,17 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // Update matcher to exclude PWA related files and sw.js
-  matcher:
-    "/((?!api|_next/static|_next/image|favicon.ico|sw.js|workbox-.*|manifest.json).*)",
+  // Specific matcher that excludes all PWA and static assets
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - PWA files (sw.js, manifest.json, workbox-*)
+     * - static assets (public folder files)
+     */
+    "/((?!api|_next/static|_next/image|favicon.ico|sw\\.js|workbox-.*|manifest\\.json|android|ios|windows11).*)",
+  ],
 };
