@@ -4,6 +4,7 @@ import { Spinner } from "@/components/spinner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -15,6 +16,7 @@ import {
 import { Reservation, STATUS_BADGES } from "@/types/reservation";
 import { getRatingCategory } from "@/types/user-rating";
 import { format } from "date-fns";
+import { Inbox, RotateCw, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -22,10 +24,16 @@ export default function OrdersPage() {
   const [orders, setOrders] = useState<
     (Reservation & { userRating?: number })[]
   >([]);
+  const [filteredOrders, setFilteredOrders] = useState<
+    (Reservation & { userRating?: number })[]
+  >([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadingStates, setLoadingStates] = useState<{
     [key: string]: boolean;
   }>({});
+  const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const ordersPerPage = 10;
 
   const setLoading = (orderId: string, action: string, isLoading: boolean) => {
     setLoadingStates((prev) => ({
@@ -33,6 +41,30 @@ export default function OrdersPage() {
       [`${orderId}-${action}`]: isLoading,
     }));
   };
+
+  // Handle search input
+  useEffect(() => {
+    const filtered = orders.filter((order) => {
+      const searchStr = searchQuery.toLowerCase();
+      const items = order.items
+        .map((item) => item.name.toLowerCase())
+        .join(" ");
+      const status = STATUS_BADGES[order.status].label.toLowerCase();
+      const orderDate = format(
+        new Date(order.createdAt),
+        "MMM d, h:mm a"
+      ).toLowerCase();
+
+      return (
+        items.includes(searchStr) ||
+        status.includes(searchStr) ||
+        orderDate.includes(searchStr) ||
+        order.completionPin?.toString().includes(searchStr)
+      );
+    });
+    setFilteredOrders(filtered);
+    setCurrentPage(1); // Reset to first page when search changes
+  }, [searchQuery, orders]);
 
   const fetchOrders = async () => {
     setIsLoading(true);
@@ -157,11 +189,41 @@ export default function OrdersPage() {
     }, 0);
   };
 
+  // Calculate pagination
+  const indexOfLastOrder = currentPage * ordersPerPage;
+  const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
+  const currentOrders = filteredOrders.slice(
+    indexOfFirstOrder,
+    indexOfLastOrder
+  );
+  const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
+
   return (
     <div className="container mx-auto px-4 py-8">
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Orders Management</CardTitle>
+          <div className="flex items-center gap-4">
+            <div className="relative w-[300px]">
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search orders..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-8"
+              />
+            </div>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={fetchOrders}
+              disabled={isLoading}
+            >
+              <RotateCw
+                className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
+              />
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -182,7 +244,7 @@ export default function OrdersPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {orders.map((order) => (
+                {currentOrders.map((order) => (
                   <TableRow key={order._id} className="!h-[96px]">
                     <TableCell>
                       {format(new Date(order.createdAt), "MMM d, h:mm a")}
@@ -300,8 +362,41 @@ export default function OrdersPage() {
               </TableBody>
             </Table>
           )}
+          {!isLoading && currentOrders.length === 0 && (
+            <div className="py-16 flex flex-col items-center gap-4">
+              <Inbox className="h-12 w-12 text-muted-foreground" />
+              <div className="text-xl font-medium text-muted-foreground">
+                No orders found
+              </div>
+              <div className="text-sm text-muted-foreground">
+                {searchQuery
+                  ? "Try adjusting your search terms or clear the search to see all orders"
+                  : "New orders will appear here once customers make reservations"}
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
+
+      {/* Pagination */}
+      {!isLoading && filteredOrders.length > ordersPerPage && (
+        <div className="mt-4 flex justify-center">
+          <div className="flex gap-2">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+              (pageNum) => (
+                <Button
+                  key={pageNum}
+                  variant={pageNum === currentPage ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setCurrentPage(pageNum)}
+                >
+                  {pageNum}
+                </Button>
+              )
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
