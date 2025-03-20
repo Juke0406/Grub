@@ -72,6 +72,9 @@ export default function BrowseAllPage() {
           params.append("search", searchQuery);
         }
 
+        // Add portal parameter to indicate this is from user portal
+        params.append("portal", "user");
+
         const response = await fetch(`/api/products?${params}`);
         const data = await response.json();
 

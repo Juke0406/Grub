@@ -21,18 +21,21 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get("limit") || "20");
     const page = parseInt(searchParams.get("page") || "1");
     const skip = (page - 1) * limit;
+    const portal = searchParams.get("portal");
 
     const db = await getDatabase();
 
-    // Find store by ownerId from session
-    const store = await db.collection("stores").findOne({ ownerId: userId });
+    // Build base query object
+    const query: any = {};
 
-    if (!store) {
-      return NextResponse.json({ error: "Store not found" }, { status: 404 });
+    // Only filter by store if in business portal
+    if (portal === "business") {
+      const store = await db.collection("stores").findOne({ ownerId: userId });
+      if (!store) {
+        return NextResponse.json({ error: "Store not found" }, { status: 404 });
+      }
+      query.storeId = store._id.toString();
     }
-
-    // Build query object with store ID
-    const query: any = { storeId: store._id.toString() };
 
     // Add filters
     if (category) {

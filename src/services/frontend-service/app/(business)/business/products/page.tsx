@@ -158,6 +158,9 @@ export default function ProductsPage() {
           searchParams.append("category", activeCategory);
         }
 
+        // Add portal parameter to indicate this is from business portal
+        searchParams.append("portal", "business");
+
         const res = await fetch(`/api/products?${searchParams.toString()}`);
         const data = await res.json();
 
