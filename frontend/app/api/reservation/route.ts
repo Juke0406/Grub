@@ -1,9 +1,16 @@
-import { NextRequest, NextResponse } from "next/server";
-import { MongoClient } from "mongodb";
-import { getDatabase, toObjectId } from "@/lib/mongodb";
 import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
+import { getDatabase } from "@/lib/mongodb";
 import { Reservation } from "@/types/reservation";
+import { headers } from "next/headers";
+import { NextRequest, NextResponse } from "next/server";
+
+interface ReservationItem {
+  name: string;
+  quantity: number;
+  originalPrice: number;
+  discountPercentage: number;
+  image: string;
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -77,6 +84,7 @@ export async function POST(request: NextRequest) {
     if (
       !data.storeName ||
       !data.storeLocation ||
+      !data.storeImage ||
       !data.items ||
       !data.items.length
     ) {
@@ -91,7 +99,8 @@ export async function POST(request: NextRequest) {
         !item.name ||
         !item.quantity ||
         !item.originalPrice ||
-        !item.discountPercentage
+        !item.discountPercentage ||
+        !item.image
       ) {
         return NextResponse.json(
           { error: "Invalid item data" },
@@ -100,15 +109,25 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Generate a 6-digit completion pin
+    const completionPin = Math.floor(
+      100000 + Math.random() * 900000
+    ).toString();
+
     const newReservation: Omit<Reservation, "_id"> = {
       userId,
       storeName: data.storeName,
       storeLocation: data.storeLocation,
-      items: data.items,
+      storeImage: data.storeImage,
+      items: data.items.map((item: ReservationItem) => ({
+        ...item,
+        image: item.image,
+      })),
       status: "pending",
       pickupTime: data.pickUpTime,
       pickupEndTime: data.pickUpEndTime,
       createdAt: new Date().toISOString(),
+      completionPin,
     };
 
     const db = await getDatabase();

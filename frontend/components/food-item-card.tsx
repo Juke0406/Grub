@@ -18,6 +18,8 @@ import {
   Store,
   Timer,
 } from "lucide-react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 interface FoodItemProps {
@@ -71,6 +73,7 @@ export function FoodItemCard({
   storeHoursToday,
   onReservationComplete,
 }: FoodItemProps & { onReservationComplete?: () => void }) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [selectedQty, setSelectedQty] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
@@ -126,11 +129,17 @@ export function FoodItemCard({
               discountPercentage: Math.round(
                 100 - (discountedPrice / originalPrice) * 100
               ),
+              image: image,
             },
           ],
-          storeLocation: "placeholder-location",
-          pickUpTime: "2025-03-11T14:00:00Z",
-          pickUpEndTime: "2025-03-11T17:00:00Z",
+          storeImage: image, // Add store image
+          storeLocation: storeAddress,
+          pickUpTime: `${new Date().toISOString().split("T")[0]}T${
+            storeHoursToday.open
+          }`,
+          pickUpEndTime: `${new Date().toISOString().split("T")[0]}T${
+            storeHoursToday.close
+          }`,
         }),
       });
 
@@ -148,7 +157,7 @@ export function FoodItemCard({
       setTimeout(() => {
         setOpen(false);
         setSuccess(false);
-        onReservationComplete?.();
+        router.push("/reservations/active");
       }, 1500);
     } catch (error) {
       console.error("Error:", error);
@@ -161,11 +170,14 @@ export function FoodItemCard({
     <>
       <div className="group bg-white rounded-xl overflow-hidden border transition-all duration-300 hover:shadow-lg hover:scale-[1.02] hover:border-gray-200">
         <div className="relative h-48 bg-gray-100 overflow-hidden">
-          <img
-            src={image}
-            alt={name}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-          />
+          <div className="relative w-full h-full">
+            <Image
+              src={image}
+              alt={name}
+              fill
+              className="object-cover transition-transform duration-300 group-hover:scale-110"
+            />
+          </div>
           <div className="absolute top-0 right-0 bg-gradient-to-bl from-green-500 to-emerald-600 text-white px-4 py-2 rounded-bl-xl text-sm font-semibold shadow-lg">
             {Math.round(100 - (discountedPrice / originalPrice) * 100)}% OFF
           </div>
@@ -240,11 +252,14 @@ export function FoodItemCard({
           <div className="space-y-6">
             {/* Image and basic info */}
             <div className="flex gap-4">
-              <img
-                src={image}
-                alt={name}
-                className="w-32 h-32 object-cover rounded-lg"
-              />
+              <div className="relative w-32 h-32">
+                <Image
+                  src={image}
+                  alt={name}
+                  fill
+                  className="object-cover rounded-lg"
+                />
+              </div>
               <div className="space-y-2">
                 <h3 className="font-semibold text-lg">{name}</h3>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">

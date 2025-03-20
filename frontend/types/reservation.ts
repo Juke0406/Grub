@@ -3,11 +3,13 @@ export interface Reservation {
   userId: string;
   storeName: string;
   storeLocation: string;
+  storeImage: string;
   items: {
     name: string;
     quantity: number;
     originalPrice: number;
     discountPercentage: number;
+    image: string;
   }[];
   status: "pending" | "confirmed" | "ready" | "completed" | "cancelled";
   pickupTime: string;

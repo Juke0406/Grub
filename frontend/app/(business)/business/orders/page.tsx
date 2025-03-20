@@ -4,12 +4,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
   Table,
   TableBody,
   TableCell,
@@ -24,9 +18,6 @@ import { toast } from "sonner";
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Reservation[]>([]);
-  const [selectedOrder, setSelectedOrder] = useState<Reservation | null>(null);
-  const [showPinDialog, setShowPinDialog] = useState(false);
-
   const fetchOrders = async () => {
     try {
       const response = await fetch("/api/reservation");
@@ -59,12 +50,6 @@ export default function OrdersPage() {
       if (!response.ok) throw new Error("Failed to update order");
 
       const updatedOrder = await response.json();
-
-      // If the order was completed and we got a pin, show the dialog
-      if (newStatus === "completed" && updatedOrder.completionPin) {
-        setSelectedOrder(updatedOrder);
-        setShowPinDialog(true);
-      }
 
       // Refresh orders list
       fetchOrders();
@@ -103,7 +88,7 @@ export default function OrdersPage() {
             </TableHeader>
             <TableBody>
               {orders.map((order) => (
-                <TableRow key={order._id}>
+                <TableRow key={order._id} className="!h-[96px]">
                   <TableCell>
                     {format(new Date(order.createdAt), "MMM d, h:mm a")}
                   </TableCell>
@@ -148,14 +133,12 @@ export default function OrdersPage() {
                       </Button>
                     )}
                     {order.status === "ready" && (
-                      <Button
-                        variant="outline"
-                        onClick={() =>
-                          updateOrderStatus(order._id, "completed")
-                        }
-                      >
-                        Complete
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary">
+                          PIN: {order.completionPin}
+                        </Badge>
+                        <Badge variant="outline">Awaiting customer</Badge>
+                      </div>
                     )}
                   </TableCell>
                 </TableRow>
@@ -164,26 +147,6 @@ export default function OrdersPage() {
           </Table>
         </CardContent>
       </Card>
-
-      <Dialog open={showPinDialog} onOpenChange={setShowPinDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Order Completion PIN</DialogTitle>
-          </DialogHeader>
-          <div className="py-6">
-            <p className="text-center mb-4">
-              Share this PIN with the customer to complete their order:
-            </p>
-            <div className="text-4xl font-mono text-center bg-secondary p-4 rounded-lg">
-              {selectedOrder?.completionPin}
-            </div>
-            <p className="text-sm text-muted-foreground text-center mt-4">
-              The customer will need to enter this PIN to mark their order as
-              collected.
-            </p>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

@@ -4,7 +4,10 @@ import { Reservation } from "@/types/reservation";
 import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function PATCH(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+export async function PATCH(
+  request: NextRequest,
+  props: { params: Promise<{ id: string }> }
+) {
   const params = await props.params;
   try {
     const session = await auth.api.getSession({
@@ -24,7 +27,7 @@ export async function PATCH(request: NextRequest, props: { params: Promise<{ id:
     }
 
     const { status } = await request.json();
-    if (!status || !["confirmed", "ready", "completed"].includes(status)) {
+    if (!status || !["confirmed", "ready"].includes(status)) {
       return NextResponse.json(
         { error: "Invalid status update" },
         { status: 400 }
@@ -39,13 +42,7 @@ export async function PATCH(request: NextRequest, props: { params: Promise<{ id:
     const db = await getDatabase();
     const collection = db.collection("reservations");
 
-    // Generate completion pin if status is being set to completed
     const updateData: Partial<Reservation> = { status };
-    if (status === "completed") {
-      // Generate a 6-digit pin
-      const pin = Math.floor(100000 + Math.random() * 900000).toString();
-      updateData.completionPin = pin;
-    }
 
     const result = await collection.findOneAndUpdate(
       { _id: reservationObjectId },
@@ -70,7 +67,10 @@ export async function PATCH(request: NextRequest, props: { params: Promise<{ id:
   }
 }
 
-export async function DELETE(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+export async function DELETE(
+  request: NextRequest,
+  props: { params: Promise<{ id: string }> }
+) {
   const params = await props.params;
   try {
     const session = await auth.api.getSession({
