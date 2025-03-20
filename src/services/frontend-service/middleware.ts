@@ -24,6 +24,18 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher:
-    "/((?!api|_next/static|_next/image|favicon.ico|public|sw.js|manifest.json).*)",
+  matcher: [
+    // Match all paths except those that start with:
+    // - api (API routes)
+    // - _next/static (static files)
+    // - _next/image (image optimization files)
+    // - favicon.ico (favicon file)
+    // - manifest.json (PWA manifest)
+    // - /android (PWA icons)
+    // - /ios (PWA icons)
+    // - /windows11 (PWA icons)
+    // - workbox (service worker)
+    // - sw.js (service worker)
+    "/((?!api|_next/static|_next/image|favicon\\.ico|manifest\\.json|android|ios|windows11|workbox|sw\\.js).*)",
+  ],
 };
