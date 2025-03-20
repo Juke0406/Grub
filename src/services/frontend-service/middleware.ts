@@ -2,7 +2,7 @@ import { getSessionCookie } from "better-auth/cookies";
 import { NextResponse, type NextRequest } from "next/server";
 
 // Specify Edge Runtime
-export const runtime = "edge";
+export const runtime = "experimental-edge";
 
 // Paths that should only be accessible in business portal
 const BUSINESS_PATHS = [
