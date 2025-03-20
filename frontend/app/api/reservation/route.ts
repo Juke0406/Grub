@@ -120,7 +120,10 @@ export async function POST(request: NextRequest) {
       storeLocation: data.storeLocation,
       storeImage: data.storeImage,
       items: data.items.map((item: ReservationItem) => ({
-        ...item,
+        name: item.name,
+        quantity: item.quantity,
+        originalPrice: item.originalPrice,
+        discountPercentage: item.discountPercentage,
         image: item.image,
       })),
       status: "pending",

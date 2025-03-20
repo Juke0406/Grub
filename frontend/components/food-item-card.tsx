@@ -29,6 +29,7 @@ interface FoodItemProps {
   originalPrice: number;
   discountedPrice: number;
   image: string;
+  storeImage?: string;
   availableUntil: string;
   quantity: number;
   storeAddress: string;
@@ -66,6 +67,7 @@ export function FoodItemCard({
   originalPrice,
   discountedPrice,
   image,
+  storeImage,
   availableUntil,
   quantity,
   storeAddress,
@@ -79,43 +81,10 @@ export function FoodItemCard({
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  // const handleReserve = async () => {
-  //   setIsLoading(true);
-  //   try {
-  //     const res = await fetch('/api/reservation', {
-  //       method: 'POST',
-  //       headers: { 'Content-Type': 'application/json' },
-  //       body: JSON.stringify({
-  //         storeName: shop,
-  //         items: [
-  //           {
-  //             name: name,
-  //             quantity: selectedQty,
-  //             originalPrice: originalPrice,
-  //             discountPercentage: Math.round(100 - (discountedPrice / originalPrice) * 100),
-  //           },
-  //         ],
-  //         storeLocation: "placeholder-location",
-  //         pickUpTime: "2025-03-11T14:00:00Z",
-  //         pickUpEndTime: "2025-03-11T17:00:00Z",
-  //       }),
-  //     });
-  //     await res.json();
-  //     setSuccess(true);
-  //     setTimeout(() => {
-  //       setOpen(false);
-  //       setSuccess(false);
-  //     }, 1500);
-  //   } catch (error) {
-  //     console.error("Error:", error);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
   const handleReserve = async () => {
     setIsLoading(true);
     try {
-      // Step 1: Make reservation
+      // Create the reservation
       await fetch("/api/reservation", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -132,7 +101,7 @@ export function FoodItemCard({
               image: image,
             },
           ],
-          storeImage: image, // Add store image
+          storeImage: storeImage || image,
           storeLocation: storeAddress,
           pickUpTime: `${new Date().toISOString().split("T")[0]}T${
             storeHoursToday.open
@@ -148,7 +117,7 @@ export function FoodItemCard({
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          productId: id, // make sure you pass `id` as prop to FoodItemCard
+          productId: id,
           quantityReserved: selectedQty,
         }),
       });
@@ -157,6 +126,7 @@ export function FoodItemCard({
       setTimeout(() => {
         setOpen(false);
         setSuccess(false);
+        onReservationComplete?.();
         router.push("/reservations/active");
       }, 1500);
     } catch (error) {

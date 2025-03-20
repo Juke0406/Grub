@@ -162,8 +162,7 @@ const mockProducts = [
     originalPrice: 9.99,
     discountedPrice: 8.49,
     category: "others",
-    imageUrl:
-      "https://plus.unsplash.com/premium_photo-1674076592971-716676c4ba9c",
+    imageUrl: "https://images.unsplash.com/photo-1542990253-a781e04c0082",
     inventory: {
       quantity: Math.floor(Math.random() * 40) + 20,
       expirationDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
@@ -331,8 +330,7 @@ const mockProducts = [
     originalPrice: 2.99,
     discountedPrice: 2.49,
     category: "produce",
-    imageUrl:
-      "https://plus.unsplash.com/premium_photo-1726138617400-da017a54800f",
+    imageUrl: "https://images.unsplash.com/photo-1538596313828-41d729090199",
     inventory: {
       quantity: Math.floor(Math.random() * 30) + 10,
       expirationDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),

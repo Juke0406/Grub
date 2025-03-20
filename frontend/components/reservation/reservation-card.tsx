@@ -55,7 +55,7 @@ export function ReservationCard({
       google: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
         STORE_COORDS.address
       )}`,
-      apple: `http://maps.apple.com/?q=${encodeURIComponent(
+      apple: `http://beta.maps.apple.com/?q=${encodeURIComponent(
         STORE_COORDS.address
       )}`,
     }),

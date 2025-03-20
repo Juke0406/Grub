@@ -17,6 +17,7 @@ interface Item {
   originalPrice: number;
   discountedPrice: number;
   image: string;
+  storeImage: string;
   distance: number;
   rating: number;
   availableUntil: string;
@@ -79,26 +80,34 @@ export default function BrowseAllPage() {
           return;
         }
 
-        const transformed = data.products.map((product: any) => ({
-          id: product._id,
-          name: product.name,
-          shop: product.storeName || "Unknown Store",
-          type: product.category,
-          category: product.category,
-          originalPrice: product.originalPrice,
-          discountedPrice: product.discountedPrice,
-          image: product.imageUrl,
-          distance: Math.random() * 5,
-          rating: Math.floor(Math.random() * 5) + 1,
-          availableUntil: product.inventory.expirationDate,
-          quantity: product.inventory.quantity,
-          storeAddress: product.storeAddress || "Address not available",
-          storeHoursToday: product.storeHoursToday || {
-            open: "09:00",
-            close: "17:00",
-            isOpen: true,
-          },
-        }));
+        const transformed = await Promise.all(
+          data.products.map(async (product: any) => {
+            const storeResponse = await fetch(`/api/stores/${product.storeId}`);
+            const storeData = await storeResponse.json();
+
+            return {
+              id: product._id,
+              name: product.name,
+              shop: product.storeName || "Unknown Store",
+              type: product.category,
+              category: product.category,
+              originalPrice: product.originalPrice,
+              discountedPrice: product.discountedPrice,
+              image: product.imageUrl,
+              storeImage: storeData.store?.image || product.imageUrl, // Use store image or fallback to product image
+              distance: Math.random() * 5,
+              rating: Math.floor(Math.random() * 5) + 1,
+              availableUntil: product.inventory.expirationDate,
+              quantity: product.inventory.quantity,
+              storeAddress: product.storeAddress || "Address not available",
+              storeHoursToday: product.storeHoursToday || {
+                open: "09:00",
+                close: "17:00",
+                isOpen: true,
+              },
+            };
+          })
+        );
 
         if (pageNum === 1) {
           setItems(transformed);
@@ -211,6 +220,7 @@ export default function BrowseAllPage() {
                     originalPrice={item.originalPrice}
                     discountedPrice={item.discountedPrice}
                     image={item.image}
+                    storeImage={item.storeImage}
                     availableUntil={item.availableUntil}
                     quantity={item.quantity}
                     storeAddress={item.storeAddress}
