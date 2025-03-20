@@ -2,8 +2,10 @@ import { getDatabase } from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 import { NextResponse } from "next/server";
 
-export async function GET(req: Request, props: { params: Promise<{ id: string }> }) {
-  const params = await props.params;
+export async function GET(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
   try {
     const { id } = params;
     const db = await getDatabase();
@@ -18,10 +20,14 @@ export async function GET(req: Request, props: { params: Promise<{ id: string }>
     }
 
     // Get store's products
+    console.log("Looking for products with storeId:", id);
     const products = await db
       .collection("products")
-      .find({ storeId: new ObjectId(id) })
+      .find({
+        storeId: store._id.toString(), // Use toString() since products store storeId as string
+      })
       .toArray();
+    console.log("Found products:", products);
 
     const formattedProducts = products.map((product) => ({
       ...product,

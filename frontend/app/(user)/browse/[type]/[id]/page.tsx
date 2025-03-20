@@ -4,7 +4,7 @@ import { FoodItemCard } from "@/components/food-item-card";
 import { Spinner } from "@/components/spinner";
 import { StoreHeader } from "@/components/store-header";
 import { Store } from "@/types/store";
-import { useCallback, useEffect, useState, use } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 interface StoreDetails {
   store: Store & {
@@ -14,20 +14,27 @@ interface StoreDetails {
   products: {
     _id: string;
     name: string;
+    shop: string;
     originalPrice: number;
     discountedPrice: number;
     image: string;
     availableUntil: string;
     quantity: number;
+    storeAddress: string;
+    storeHoursToday: {
+      open: string;
+      close: string;
+      isOpen: boolean;
+    };
+    distance: number;
   }[];
 }
 
-export default function StorePage(
-  props: {
-    params: Promise<{ id: string; type: string }>;
-  }
-) {
-  const params = use(props.params);
+export default function StorePage({
+  params,
+}: {
+  params: { id: string; type: string };
+}) {
   const [data, setData] = useState<StoreDetails | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -47,11 +54,20 @@ export default function StorePage(
           distance: Math.random() * 5,
         },
         products: data.products.map((product: any) => ({
-          ...product,
+          _id: product._id,
+          name: product.name,
           shop: data.store.name,
+          originalPrice: product.originalPrice,
+          discountedPrice: product.discountedPrice,
+          image: product.imageUrl,
           availableUntil: product.inventory.expirationDate,
           quantity: product.inventory.quantity,
-          image: product.imageUrl,
+          storeAddress: data.store.location.address,
+          storeHoursToday: {
+            open: data.store.businessHours[0].open,
+            close: data.store.businessHours[0].close,
+            isOpen: data.store.businessHours[0].isOpen,
+          },
           distance: Math.random() * 5,
         })),
       };
