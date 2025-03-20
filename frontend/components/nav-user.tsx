@@ -33,12 +33,14 @@ import { toast } from "sonner";
 
 export function NavUser({
   user,
+  variant = "default",
 }: {
   user: {
     name: string;
     email: string;
     avatar: string;
   };
+  variant?: "default" | "mobile";
 }) {
   const { isMobile } = useSidebar();
   const router = useRouter();
@@ -60,7 +62,63 @@ export function NavUser({
     return <Button onClick={() => router.push("/login")}>Log in</Button>;
   }
 
-  return (
+  return variant === "mobile" ? (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button className="flex items-center justify-center">
+          <Avatar className="size-9 rounded-lg">
+            <AvatarImage src={user.avatar} alt={user.name} />
+            <AvatarFallback className="rounded-lg">
+              {user.name
+                .split(" ")
+                .slice(0, 2)
+                .map((word) => word[0].toUpperCase())
+                .join("")}
+            </AvatarFallback>
+          </Avatar>
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        className="min-w-56 rounded-lg"
+        side="top"
+        align="end"
+        sideOffset={12}
+      >
+        <DropdownMenuLabel className="p-0 font-normal">
+          <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+            <Avatar className="h-8 w-8 rounded-lg">
+              <AvatarImage src={user.avatar} alt={user.name} />
+              <AvatarFallback className="rounded-lg">
+                {user.name
+                  .split(" ")
+                  .slice(0, 2)
+                  .map((word) => word[0].toUpperCase())
+                  .join("")}
+              </AvatarFallback>
+            </Avatar>
+            <div className="grid flex-1 text-left text-sm leading-tight">
+              <span className="truncate font-medium">{user.name}</span>
+              <span className="truncate text-xs">{user.email}</span>
+            </div>
+          </div>
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuGroup>
+          <DropdownMenuLabel className="font-normal">
+            <span className="text-xs font-semibold uppercase text-muted-foreground">
+              Switch Portal
+            </span>
+          </DropdownMenuLabel>
+          <PortalSwitcher />
+        </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={handleLogOut}>
+          <LogOut />
+          Log Out
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  ) : (
     <SidebarMenu>
       <SidebarMenuItem>
         <DropdownMenu>
@@ -79,11 +137,15 @@ export function NavUser({
                     .join("")}
                 </AvatarFallback>
               </Avatar>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{user.name}</span>
-                <span className="truncate text-xs">{user.email}</span>
-              </div>
-              <ChevronDown className="ml-auto size-4" />
+              {variant === "default" && (
+                <>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-medium">{user.name}</span>
+                    <span className="truncate text-xs">{user.email}</span>
+                  </div>
+                  <ChevronDown className="ml-auto size-4" />
+                </>
+              )}
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
