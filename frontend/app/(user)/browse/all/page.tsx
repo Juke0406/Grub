@@ -201,7 +201,7 @@ export default function BrowseAllPage() {
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 relative">
               {sortedItems.map((item, index) => (
                 <div
-                  key={item.id}
+                  key={`${item.id}-${index}`}
                   ref={index === sortedItems.length - 1 ? lastItemRef : null}
                 >
                   <FoodItemCard

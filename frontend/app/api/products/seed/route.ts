@@ -476,8 +476,7 @@ const mockProducts = [
     originalPrice: 4.49,
     discountedPrice: 3.49,
     category: "pastries",
-    imageUrl:
-      "https://plus.unsplash.com/premium_photo-1673282160288-9d5381f471af",
+    imageUrl: "https://images.unsplash.com/photo-1593872570467-f7491ce2a52e",
     inventory: {
       quantity: Math.floor(Math.random() * 25) + 15,
       expirationDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),

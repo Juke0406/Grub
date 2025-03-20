@@ -379,7 +379,7 @@ export default function OrdersPage() {
       </Card>
 
       {/* Pagination */}
-      {!isLoading && filteredOrders.length > ordersPerPage && (
+      {!isLoading && filteredOrders.length > 0 && (
         <div className="mt-4 flex justify-center">
           <div className="flex gap-2">
             {Array.from({ length: totalPages }, (_, i) => i + 1).map(
