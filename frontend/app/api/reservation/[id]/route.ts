@@ -1,6 +1,11 @@
 import { auth } from "@/lib/auth";
 import { getDatabase, toObjectId } from "@/lib/mongodb";
 import { Reservation } from "@/types/reservation";
+import {
+  DEFAULT_RATING,
+  RATING_PENALTIES,
+  UserRating,
+} from "@/types/user-rating";
 import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -26,14 +31,6 @@ export async function PATCH(
       );
     }
 
-    const { status } = await request.json();
-    if (!status || !["confirmed", "ready"].includes(status)) {
-      return NextResponse.json(
-        { error: "Invalid status update" },
-        { status: 400 }
-      );
-    }
-
     const reservationObjectId = toObjectId(reservationId);
     if (!reservationObjectId) {
       return NextResponse.json({ error: "Invalid objectId" }, { status: 400 });
@@ -42,8 +39,38 @@ export async function PATCH(
     const db = await getDatabase();
     const collection = db.collection("reservations");
 
+    const { status } = await request.json();
+    if (!status || !["confirmed", "ready", "cancelled"].includes(status)) {
+      return NextResponse.json(
+        { error: "Invalid status update" },
+        { status: 400 }
+      );
+    }
+
+    if (status === "cancelled") {
+      // Verify status can be changed to cancelled
+      const reservation = await collection.findOne({
+        _id: reservationObjectId,
+      });
+
+      if (!reservation) {
+        return NextResponse.json(
+          { error: "Reservation not found" },
+          { status: 404 }
+        );
+      }
+
+      if (["cancelled", "completed", "ready"].includes(reservation.status)) {
+        return NextResponse.json(
+          { error: "Cannot cancel order in current state" },
+          { status: 400 }
+        );
+      }
+    }
+
     const updateData: Partial<Reservation> = { status };
 
+    // Update reservation status
     const result = await collection.findOneAndUpdate(
       { _id: reservationObjectId },
       { $set: updateData },
@@ -121,9 +148,48 @@ export async function DELETE(
     }
 
     // Update the reservation status to cancelled
+    // Update the reservation status to cancelled
     await collection.updateOne(
       { _id: reservationObjectId, userId: session.user.id },
       { $set: { status: "cancelled" } }
+    );
+
+    // Update user rating for cancellation
+    const userRatingsCollection = db.collection("userRatings");
+    let userRating = await userRatingsCollection.findOne<UserRating>({
+      userId: session.user.id,
+    });
+
+    if (!userRating) {
+      // Create new rating entry
+      const newRating: Omit<UserRating, "_id"> = {
+        userId: session.user.id,
+        rating: DEFAULT_RATING,
+        lastUpdated: new Date().toISOString(),
+      };
+      await userRatingsCollection.insertOne(newRating);
+      userRating = {
+        ...newRating,
+        _id: (await userRatingsCollection.findOne<UserRating>({
+          userId: session.user.id,
+        }))!._id,
+      };
+    }
+
+    // Update rating, ensuring it stays between 0 and 100
+    const updatedRating = Math.max(
+      0,
+      Math.min(100, userRating.rating + RATING_PENALTIES.CANCELLATION)
+    );
+
+    await userRatingsCollection.updateOne(
+      { userId: session.user.id },
+      {
+        $set: {
+          rating: updatedRating,
+          lastUpdated: new Date().toISOString(),
+        },
+      }
     );
 
     return NextResponse.json({
