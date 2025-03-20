@@ -101,7 +101,7 @@ export default function AnalyticsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Chart Card */}
           <div className="bg-white rounded-lg shadow p-4">
-            <h2 className="text-xl font-semibold mb-2">Current Inventory</h2>
+            <h2 className="text-xl font-medium mb-2">Current Inventory</h2>
             <div className="w-full h-72">
               <ResponsiveContainer width="100%" height="100%">
                 {/* layout="vertical" makes the chart horizontal */}
@@ -132,7 +132,7 @@ export default function AnalyticsPage() {
 
           {/* Recommendations Card */}
           <div className="bg-white rounded-lg shadow p-4">
-            <h2 className="text-xl font-semibold mb-4">Recommendations</h2>
+            <h2 className="text-xl font-medium mb-4">Recommendations</h2>
             <div className="overflow-x-auto">
               <table className="min-w-full border border-gray-200">
                 <thead className="bg-gray-100">

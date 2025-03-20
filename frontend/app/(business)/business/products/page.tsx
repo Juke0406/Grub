@@ -721,9 +721,14 @@ export default function ProductsPage() {
                             mode="single"
                             selected={field.value}
                             onSelect={field.onChange}
-                            disabled={(date) =>
-                              date < new Date() || date > new Date("2025-01-01")
-                            }
+                            disabled={(date) => {
+                              const today = new Date();
+                              const twoYearsFromNow = new Date();
+                              twoYearsFromNow.setFullYear(
+                                today.getFullYear() + 2
+                              );
+                              return date < today;
+                            }}
                             initialFocus
                           />
                         </PopoverContent>
