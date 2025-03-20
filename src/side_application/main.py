@@ -155,7 +155,7 @@ def demo_action():
         print("-" * 40)
 
     # Send a POST request to the API
-    url = "http://localhost:3000/api/products"
+    url = "https://grub-app.vercel.app/api/products"
     headers = {"Content-Type": "application/json"}
     response = requests.post(url, json=products, headers=headers)
     print("Response:", response.json())
@@ -168,7 +168,7 @@ def demo_action():
     # send a patch request to the API
     print(api_key)
     for product in products:
-        url = "http://localhost:3000/api/api-key"
+        url = "https://grub-app.vercel.app/api/api-key"
         headers = {"Content-Type": "application/json"}
         response = requests.patch(url, json={"key": api_key}, headers=headers)
         print("Response:", response)
