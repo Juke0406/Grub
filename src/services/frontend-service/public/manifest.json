@@ -1,6 +1,12 @@
 {
   "name": "Grub",
   "short_name": "Grub",
+  "description": "Save food, save money, save the earth with last-minute discounts from local bakeries and supermarkets",
+  "start_url": "/browse",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#22C55E",
+  "orientation": "portrait-primary",
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",
@@ -462,8 +468,5 @@
       "src": "ios/1024.png",
       "sizes": "1024x1024"
     }
-  ],
-  "theme_color": "#366240",
-  "background_color": "#366240",
-  "display": "standalone"
+  ]
 }
