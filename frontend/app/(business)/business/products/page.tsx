@@ -1,12 +1,13 @@
 "use client";
 
 import { PRODUCT_CATEGORIES } from "@/components/category-filter";
+import { SearchHeader } from "@/components/search-header";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon, Loader2, Store } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
@@ -79,9 +80,14 @@ const formSchema = z.object({
   }),
 });
 
+const categories = [
+  { id: "all", name: "All", icon: <Store className="h-4 w-4" /> },
+  ...PRODUCT_CATEGORIES.slice(1), // Skip the "All Products" entry since we have our own
+];
+
 export default function ProductsPage() {
   const { data: session, isPending } = authClient.useSession();
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState<any[]>([]);
   const [responseMessage, setResponseMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
@@ -89,38 +95,38 @@ export default function ProductsPage() {
   const [storeId, setStoreId] = useState<string | null>(null);
   const [isSeeding, setIsSeeding] = useState(false);
   const [isStoreLoading, setIsStoreLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
+  const [activeCategory, setActiveCategory] = useState("all");
+  const observer = useRef<IntersectionObserver | null>(null);
 
-  useEffect(() => {
-    const fetchStoreId = async () => {
-      if (!session?.user?.id) {
-        console.error("No authenticated user found");
-        return;
-      }
-
-      try {
-        setIsStoreLoading(true);
-        const storeRes = await fetch("/api/stores");
-        const storeData = await storeRes.json();
-
-        if (storeData?.store?._id) {
-          setStoreId(storeData.store._id);
-          fetchProducts();
-        } else {
-          console.error("No store found in response:", storeData);
-        }
-      } catch (error) {
-        console.error("Error fetching store:", error);
-      } finally {
-        setTimeout(() => {
-          setIsStoreLoading(false);
-        }, 3000);
-      }
-    };
-
-    if (!isPending && session) {
-      fetchStoreId();
+  const fetchStoreId = useCallback(async () => {
+    if (!session?.user?.id) {
+      console.error("No authenticated user found");
+      return;
     }
-  }, [session, isPending]);
+
+    try {
+      setIsStoreLoading(true);
+      const storeRes = await fetch("/api/stores");
+      const storeData = await storeRes.json();
+
+      if (storeData?.store?._id) {
+        setStoreId(storeData.store._id);
+        fetchProducts(1, true);
+      } else {
+        console.error("No store found in response:", storeData);
+      }
+    } catch (error) {
+      console.error("Error fetching store:", error);
+    } finally {
+      setTimeout(() => {
+        setIsStoreLoading(false);
+      }, 3000);
+    }
+  }, [session?.user?.id]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -136,42 +142,71 @@ export default function ProductsPage() {
     },
   });
 
-  useEffect(() => {
-    const fetchStoreId = async () => {
-      if (!session?.user?.id) {
-        console.error("No authenticated user found");
-        return;
-      }
-
+  const fetchProducts = useCallback(
+    async (pageNum: number, resetProducts = false) => {
       try {
-        const storeRes = await fetch("/api/stores");
-        const storeData = await storeRes.json();
+        const searchParams = new URLSearchParams({
+          page: pageNum.toString(),
+          limit: "12",
+        });
 
-        if (storeData?.store?._id) {
-          setStoreId(storeData.store._id);
-          fetchProducts();
-        } else {
-          console.error("No store found in response:", storeData);
+        if (searchValue) {
+          searchParams.append("search", searchValue);
         }
-      } catch (error) {
-        console.error("Error fetching store:", error);
-      }
-    };
 
+        if (activeCategory !== "all") {
+          searchParams.append("category", activeCategory);
+        }
+
+        const res = await fetch(`/api/products?${searchParams.toString()}`);
+        const data = await res.json();
+
+        if (pageNum === 1 || resetProducts) {
+          setProducts(data.products || []);
+        } else {
+          setProducts((prev) => [...prev, ...(data.products || [])]);
+        }
+
+        setHasMore(data.pagination.page < data.pagination.pages);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    },
+    [searchValue, activeCategory]
+  );
+
+  useEffect(() => {
     if (!isPending && session) {
       fetchStoreId();
     }
-  }, [session, isPending]);
+  }, [session, isPending, fetchStoreId]);
 
-  const fetchProducts = async () => {
-    try {
-      const res = await fetch("/api/products");
-      const data = await res.json();
-      setProducts(data.products || []);
-    } catch (error) {
-      console.error("Error fetching products:", error);
+  const lastProductRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (isLoadingMore) return;
+      if (observer.current) observer.current.disconnect();
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasMore) {
+          setPage((prevPage) => prevPage + 1);
+        }
+      });
+      if (node) observer.current.observe(node);
+    },
+    [isLoadingMore, hasMore]
+  );
+
+  useEffect(() => {
+    if (page > 1) {
+      setIsLoadingMore(true);
+      fetchProducts(page).finally(() => setIsLoadingMore(false));
     }
-  };
+  }, [page, fetchProducts]);
+
+  useEffect(() => {
+    setPage(1);
+    setHasMore(true);
+    fetchProducts(1, true);
+  }, [searchValue, activeCategory, fetchProducts]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
@@ -217,7 +252,7 @@ export default function ProductsPage() {
       );
       form.reset();
       setEditingProduct(null);
-      fetchProducts();
+      fetchProducts(1, true);
     } catch (error) {
       console.error(error);
       setResponseMessage(
@@ -258,7 +293,7 @@ export default function ProductsPage() {
 
       setResponseMessage("Product deleted successfully!");
       setDeleteId(null);
-      fetchProducts();
+      fetchProducts(1, true);
     } catch (error) {
       console.error(error);
       setResponseMessage("Error deleting product. Please try again.");
@@ -331,6 +366,14 @@ export default function ProductsPage() {
         </TabsList>
 
         <TabsContent value="list" className="space-y-4">
+          <SearchHeader
+            onSearch={setSearchValue}
+            placeholder="Search products..."
+            categories={categories}
+            activeCategory={activeCategory}
+            onCategoryChange={setActiveCategory}
+          />
+
           {products.length === 0 ? (
             <Card className="p-12">
               <div className="flex flex-col items-center justify-center text-center space-y-4">
@@ -369,7 +412,7 @@ export default function ProductsPage() {
                         setResponseMessage(
                           `Successfully seeded ${data.count} products`
                         );
-                        fetchProducts();
+                        fetchProducts(1, true);
                       } catch (error) {
                         console.error(error);
                         setResponseMessage(
@@ -394,95 +437,111 @@ export default function ProductsPage() {
               </div>
             </Card>
           ) : (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {products.map((product: any) => (
-                <Card key={product._id} className="p-4 relative group">
-                  <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                    <div className="flex gap-2">
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => {
-                          handleEdit(product);
-                          const tabButton = document.querySelector(
-                            '[value="create"]'
-                          ) as HTMLButtonElement;
-                          tabButton?.click();
-                        }}
-                      >
-                        Edit
-                      </Button>
-                      <AlertDialog
-                        open={deleteId === product._id}
-                        onOpenChange={(open) => !open && setDeleteId(null)}
-                      >
-                        <AlertDialogTrigger asChild>
+            <div className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {products.map((product: any, index: number) => (
+                  <div
+                    key={product._id}
+                    ref={index === products.length - 1 ? lastProductRef : null}
+                  >
+                    <Card className="p-4 relative group">
+                      <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                        <div className="flex gap-2">
                           <Button
-                            variant="destructive"
+                            variant="secondary"
                             size="sm"
-                            onClick={() => setDeleteId(product._id)}
+                            onClick={() => {
+                              handleEdit(product);
+                              const tabButton = document.querySelector(
+                                '[value="create"]'
+                              ) as HTMLButtonElement;
+                              tabButton?.click();
+                            }}
                           >
-                            Delete
+                            Edit
                           </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              This action cannot be undone. This will
-                              permanently delete the product.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={() => handleDelete(product._id)}
-                              className="bg-destructive hover:bg-destructive/90"
-                            >
-                              {isLoading ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                              ) : (
-                                "Delete"
-                              )}
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
-                  </div>
-                  <div className="aspect-square relative mb-2">
-                    <img
-                      src={product.imageUrl}
-                      alt={product.name}
-                      className="object-cover rounded-md w-full h-full"
-                    />
-                  </div>
-                  <h3 className="font-semibold">{product.name}</h3>
-                  <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
-                    {product.description}
-                  </p>
-                  <div className="flex items-center gap-2 mb-2">
-                    <Badge variant="secondary">{product.category}</Badge>
-                    <Badge variant="outline">SKU: {product.SKU}</Badge>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="text-sm line-through text-muted-foreground">
-                        ${product.originalPrice}
+                          <AlertDialog
+                            open={deleteId === product._id}
+                            onOpenChange={(open) => !open && setDeleteId(null)}
+                          >
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => setDeleteId(product._id)}
+                              >
+                                Delete
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                  Are you sure?
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This action cannot be undone. This will
+                                  permanently delete the product.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleDelete(product._id)}
+                                  className="bg-destructive hover:bg-destructive/90"
+                                >
+                                  {isLoading ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    "Delete"
+                                  )}
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </div>
+                      <div className="aspect-square relative mb-2">
+                        <img
+                          src={product.imageUrl}
+                          alt={product.name}
+                          className="object-cover rounded-md w-full h-full"
+                        />
+                      </div>
+                      <h3 className="font-semibold">{product.name}</h3>
+                      <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
+                        {product.description}
                       </p>
-                      <p className="font-semibold text-lg">
-                        ${product.discountedPrice}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm text-muted-foreground">Quantity</p>
-                      <p className="font-medium">
-                        {product.inventory.quantity}
-                      </p>
-                    </div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <Badge variant="secondary">{product.category}</Badge>
+                        <Badge variant="outline">SKU: {product.SKU}</Badge>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <p className="text-sm line-through text-muted-foreground">
+                            ${product.originalPrice}
+                          </p>
+                          <p className="font-semibold text-lg">
+                            ${product.discountedPrice}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm text-muted-foreground">
+                            Quantity
+                          </p>
+                          <p className="font-medium">
+                            {product.inventory.quantity}
+                          </p>
+                        </div>
+                      </div>
+                    </Card>
                   </div>
-                </Card>
-              ))}
+                ))}
+              </div>
+              {isLoadingMore && (
+                <div className="flex justify-center py-4">
+                  <Spinner className="h-8 w-8" />
+                </div>
+              )}
             </div>
           )}
         </TabsContent>
@@ -718,7 +777,7 @@ export default function ProductsPage() {
                         setResponseMessage(
                           `Successfully seeded ${data.count} products`
                         );
-                        fetchProducts();
+                        fetchProducts(1, true);
                         const listTab = document.querySelector(
                           '[value="list"]'
                         ) as HTMLButtonElement;

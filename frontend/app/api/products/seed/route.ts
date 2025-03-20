@@ -162,7 +162,8 @@ const mockProducts = [
     originalPrice: 9.99,
     discountedPrice: 8.49,
     category: "others",
-    imageUrl: "https://images.unsplash.com/photo-1508779018996-6d57ad7e01ab",
+    imageUrl:
+      "https://plus.unsplash.com/premium_photo-1674076592971-716676c4ba9c",
     inventory: {
       quantity: Math.floor(Math.random() * 40) + 20,
       expirationDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
@@ -294,7 +295,7 @@ const mockProducts = [
     originalPrice: 8.99,
     discountedPrice: 7.49,
     category: "others",
-    imageUrl: "https://images.unsplash.com/photo-1517903714255-28d2742d4a67",
+    imageUrl: "https://images.unsplash.com/photo-1622542086073-dcdc3350cc2b",
     inventory: {
       quantity: Math.floor(Math.random() * 40) + 10,
       expirationDate: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000),
@@ -403,7 +404,7 @@ const mockProducts = [
     originalPrice: 6.99,
     discountedPrice: 5.99,
     category: "dairy",
-    imageUrl: "https://images.unsplash.com/photo-1551478241-1c1c610d59d5",
+    imageUrl: "https://images.unsplash.com/photo-1589881133595-a3c085cb731d",
     inventory: {
       quantity: Math.floor(Math.random() * 35) + 15,
       expirationDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
@@ -524,7 +525,7 @@ const mockProducts = [
     originalPrice: 1.99,
     discountedPrice: 1.49,
     category: "produce",
-    imageUrl: "https://images.unsplash.com/photo-1604977042946-c8cba3961030",
+    imageUrl: "https://images.unsplash.com/photo-1568584711271-6c929fb49b60",
     inventory: {
       quantity: Math.floor(Math.random() * 40) + 20,
       expirationDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),

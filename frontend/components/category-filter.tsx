@@ -20,14 +20,22 @@ export const PRODUCT_CATEGORIES = [
   { id: "dairy", name: "Dairy", icon: <Milk className="h-4 w-4" /> },
   { id: "produce", name: "Produce", icon: <Pizza className="h-4 w-4" /> },
   { id: "others", name: "Others", icon: <CircleHelp className="h-4 w-4" /> },
-] as const;
+];
+
+interface Category {
+  id: string;
+  name: string;
+  icon?: React.ReactNode;
+}
 
 interface CategoryFilterProps {
+  categories?: Category[];
   activeCategory?: string;
   onCategoryChange: (categoryId: string) => void;
 }
 
 export function CategoryFilter({
+  categories = PRODUCT_CATEGORIES,
   activeCategory,
   onCategoryChange,
 }: CategoryFilterProps) {
@@ -40,7 +48,7 @@ export function CategoryFilter({
           isMobile ? "" : "px-2"
         }`}
       >
-        {PRODUCT_CATEGORIES.map((category) => (
+        {categories.map((category) => (
           <Button
             key={category.id}
             variant={activeCategory === category.id ? "default" : "outline"}

@@ -10,6 +10,8 @@
 
 <img src="https://images.unsplash.com/photo-1556742059-47b93231f536?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Grub Logo" />
 
+<br>
+
 **Combat Food Waste, Save Money, Make a Difference**
 
 _Connecting consumers with local bakeries and supermarkets to reduce food waste through discounted last-minute purchases_
