@@ -1,5 +1,6 @@
 "use client";
 
+import { Spinner } from "@/components/spinner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,6 +22,7 @@ export default function OrdersPage() {
   const [orders, setOrders] = useState<
     (Reservation & { userRating?: number })[]
   >([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [loadingStates, setLoadingStates] = useState<{
     [key: string]: boolean;
   }>({});
@@ -33,6 +35,7 @@ export default function OrdersPage() {
   };
 
   const fetchOrders = async () => {
+    setIsLoading(true);
     try {
       const response = await fetch("/api/reservation");
       if (!response.ok) throw new Error("Failed to fetch orders");
@@ -60,6 +63,8 @@ export default function OrdersPage() {
     } catch (error) {
       console.error("Error fetching orders:", error);
       toast.error("Failed to fetch orders");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -159,130 +164,142 @@ export default function OrdersPage() {
           <CardTitle>Orders Management</CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Order Time</TableHead>
-                <TableHead>Items</TableHead>
-                <TableHead>Total</TableHead>
-                <TableHead>Pickup Time</TableHead>
-                <TableHead>User Rating</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {orders.map((order) => (
-                <TableRow key={order._id} className="!h-[96px]">
-                  <TableCell>
-                    {format(new Date(order.createdAt), "MMM d, h:mm a")}
-                  </TableCell>
-                  <TableCell>
-                    {order.items.map((item, index) => (
-                      <div key={index}>
-                        {item.quantity}x {item.name}
-                      </div>
-                    ))}
-                  </TableCell>
-                  <TableCell>
-                    ${calculateTotal(order.items).toFixed(2)}
-                  </TableCell>
-                  <TableCell>
-                    {format(new Date(order.pickupTime), "h:mm a")}
-                  </TableCell>
-                  <TableCell>
-                    {order.userRating && (
-                      <Badge
-                        variant="secondary"
-                        className={getRatingCategory(order.userRating).color}
-                      >
-                        {getRatingCategory(order.userRating).label} (
-                        {order.userRating})
-                      </Badge>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant="default"
-                      className={STATUS_BADGES[order.status].color}
-                    >
-                      {STATUS_BADGES[order.status].label}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    {order.status === "pending" && (
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="outline"
-                          disabled={loadingStates[`${order._id}-confirm`]}
-                          onClick={() =>
-                            updateOrderStatus(order._id, "confirmed", "confirm")
-                          }
-                        >
-                          {loadingStates[`${order._id}-confirm`]
-                            ? "Confirming..."
-                            : "Confirm"}
-                        </Button>
-
-                        <Button
-                          variant="ghost"
-                          className="text-destructive hover:text-destructive"
-                          disabled={loadingStates[`${order._id}-cancel`]}
-                          onClick={() => handleCancel(order._id)}
-                        >
-                          {loadingStates[`${order._id}-cancel`]
-                            ? "Cancelling..."
-                            : "Cancel Order"}
-                        </Button>
-                      </div>
-                    )}
-                    {order.status === "confirmed" && (
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="outline"
-                          disabled={loadingStates[`${order._id}-ready`]}
-                          onClick={() =>
-                            updateOrderStatus(order._id, "ready", "ready")
-                          }
-                        >
-                          {loadingStates[`${order._id}-ready`]
-                            ? "Marking Ready..."
-                            : "Mark Ready"}
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          className="text-destructive hover:text-destructive"
-                          disabled={loadingStates[`${order._id}-cancel`]}
-                          onClick={() => handleCancel(order._id)}
-                        >
-                          {loadingStates[`${order._id}-cancel`]
-                            ? "Cancelling..."
-                            : "Cancel Order"}
-                        </Button>
-                      </div>
-                    )}
-                    {order.status === "ready" && (
-                      <div className="flex items-center gap-2">
-                        <Badge variant="secondary">
-                          PIN: {order.completionPin}
-                        </Badge>
-                        <Button
-                          variant="ghost"
-                          className="text-destructive hover:text-destructive"
-                          disabled={loadingStates[`${order._id}-not-collected`]}
-                          onClick={() => handleNotCollected(order._id)}
-                        >
-                          {loadingStates[`${order._id}-not-collected`]
-                            ? "Marking..."
-                            : "Not Collected"}
-                        </Button>
-                      </div>
-                    )}
-                  </TableCell>
+          {isLoading ? (
+            <div className="py-8">
+              <Spinner />
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Order Time</TableHead>
+                  <TableHead>Items</TableHead>
+                  <TableHead>Total</TableHead>
+                  <TableHead>Pickup Time</TableHead>
+                  <TableHead>User Rating</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {orders.map((order) => (
+                  <TableRow key={order._id} className="!h-[96px]">
+                    <TableCell>
+                      {format(new Date(order.createdAt), "MMM d, h:mm a")}
+                    </TableCell>
+                    <TableCell>
+                      {order.items.map((item, index) => (
+                        <div key={index}>
+                          {item.quantity}x {item.name}
+                        </div>
+                      ))}
+                    </TableCell>
+                    <TableCell>
+                      ${calculateTotal(order.items).toFixed(2)}
+                    </TableCell>
+                    <TableCell>
+                      {format(new Date(order.pickupTime), "h:mm a")}
+                    </TableCell>
+                    <TableCell>
+                      {order.userRating && (
+                        <Badge
+                          variant="secondary"
+                          className={getRatingCategory(order.userRating).color}
+                        >
+                          {getRatingCategory(order.userRating).label} (
+                          {order.userRating})
+                        </Badge>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant="default"
+                        className={STATUS_BADGES[order.status].color}
+                      >
+                        {STATUS_BADGES[order.status].label}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {order.status === "pending" && (
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            disabled={loadingStates[`${order._id}-confirm`]}
+                            onClick={() =>
+                              updateOrderStatus(
+                                order._id,
+                                "confirmed",
+                                "confirm"
+                              )
+                            }
+                          >
+                            {loadingStates[`${order._id}-confirm`]
+                              ? "Confirming..."
+                              : "Confirm"}
+                          </Button>
+
+                          <Button
+                            variant="ghost"
+                            className="text-destructive hover:text-destructive"
+                            disabled={loadingStates[`${order._id}-cancel`]}
+                            onClick={() => handleCancel(order._id)}
+                          >
+                            {loadingStates[`${order._id}-cancel`]
+                              ? "Cancelling..."
+                              : "Cancel Order"}
+                          </Button>
+                        </div>
+                      )}
+                      {order.status === "confirmed" && (
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            disabled={loadingStates[`${order._id}-ready`]}
+                            onClick={() =>
+                              updateOrderStatus(order._id, "ready", "ready")
+                            }
+                          >
+                            {loadingStates[`${order._id}-ready`]
+                              ? "Marking Ready..."
+                              : "Mark Ready"}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            className="text-destructive hover:text-destructive"
+                            disabled={loadingStates[`${order._id}-cancel`]}
+                            onClick={() => handleCancel(order._id)}
+                          >
+                            {loadingStates[`${order._id}-cancel`]
+                              ? "Cancelling..."
+                              : "Cancel Order"}
+                          </Button>
+                        </div>
+                      )}
+                      {order.status === "ready" && (
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary">
+                            PIN: {order.completionPin}
+                          </Badge>
+                          <Button
+                            variant="ghost"
+                            className="text-destructive hover:text-destructive"
+                            disabled={
+                              loadingStates[`${order._id}-not-collected`]
+                            }
+                            onClick={() => handleNotCollected(order._id)}
+                          >
+                            {loadingStates[`${order._id}-not-collected`]
+                              ? "Marking..."
+                              : "Not Collected"}
+                          </Button>
+                        </div>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
     </div>
