@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 // Test with standard edge runtime
-export const runtime = "edge";
+export const runtime = "experimental-edge";
 
 export function middleware(request: NextRequest) {
   // Simple logging header
