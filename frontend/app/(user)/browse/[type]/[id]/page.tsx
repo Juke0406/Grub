@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Store } from "@/types/store";
 import { Apple, ArrowLeft, Beef, Carrot, ShoppingBag } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, use } from "react";
 
 const categories = [
   { id: "all", name: "All", icon: <ShoppingBag className="h-4 w-4" /> },
@@ -41,11 +41,12 @@ interface StoreDetails {
   }[];
 }
 
-export default function StorePage({
-  params,
-}: {
-  params: { id: string; type: string };
-}) {
+export default function StorePage(
+  props: {
+    params: Promise<{ id: string; type: string }>;
+  }
+) {
+  const params = use(props.params);
   const [store, setStore] = useState<StoreDetails["store"] | null>(null);
   const [products, setProducts] = useState<StoreDetails["products"]>([]);
   const [isLoading, setIsLoading] = useState(true);
