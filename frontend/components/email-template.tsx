@@ -1,14 +1,12 @@
-import * as React from "react";
-
 interface EmailTemplateProps {
   username: string;
   uri: string;
 }
 
-export const VerificationEmail: React.FC<Readonly<EmailTemplateProps>> = ({
+export const VerificationEmail = ({
   username,
   uri,
-}) => {
+}: Readonly<EmailTemplateProps>) => {
   const emailHTML = `
         <!DOCTYPE html>
         <html lang="en">
@@ -48,9 +46,10 @@ export const VerificationEmail: React.FC<Readonly<EmailTemplateProps>> = ({
   return emailHTML;
 };
 
-export const VerificationChangeEmail: React.FC<
-  Readonly<EmailTemplateProps>
-> = ({ username, uri }) => {
+export const VerificationChangeEmail = ({
+  username,
+  uri,
+}: Readonly<EmailTemplateProps>) => {
   const emailHTML = `
         <!DOCTYPE html>
         <html lang="en">
@@ -90,10 +89,10 @@ export const VerificationChangeEmail: React.FC<
   return emailHTML;
 };
 
-export const ForgetPasswordEmail: React.FC<Readonly<EmailTemplateProps>> = ({
+export const ForgetPasswordEmail = ({
   username,
   uri,
-}) => {
+}: Readonly<EmailTemplateProps>) => {
   const emailHTML = `
         <!DOCTYPE html>
         <html lang="en">

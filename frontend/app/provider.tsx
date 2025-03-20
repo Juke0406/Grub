@@ -2,6 +2,7 @@
 
 import { AppSidebar } from "@/components/app-sidebar";
 import { MobileNav } from "@/components/mobile-nav";
+import { PWAInstallPrompt } from "@/components/pwa-prompt";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { useMobile } from "@/hooks/use-mobile";
 import { usePathname } from "next/navigation";
@@ -22,11 +23,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     pathname?.startsWith("/reset-password");
 
   if (isLandingPage || isAuthRoute) {
-    return children;
+    return <>{children}</>;
   }
 
   return (
     <SidebarProvider>
+      <PWAInstallPrompt />
       <Toaster />
       <AppSidebar />
       <SidebarInset>
