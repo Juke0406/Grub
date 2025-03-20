@@ -1,32 +1,7 @@
 import { getSessionCookie } from "better-auth/cookies";
 import { NextResponse, type NextRequest } from "next/server";
 
-// Paths that should only be accessible in business portal
-const BUSINESS_PATHS = [
-  "/business",
-  "/business/inventory",
-  "/business/products",
-  "/business/orders",
-  "/business/analytics",
-  "/business/settings/store",
-  "/business/settings/hours",
-];
-
-// Paths that should only be accessible in user portal
-const USER_PATHS = [
-  "/browse",
-  "/browse/all",
-  "/browse/bakeries",
-  "/browse/supermarkets",
-  "/reservations",
-  "/reservations/active",
-  "/reservations/history",
-  "/reservations/ratings",
-  "/settings/profile",
-];
-
 export async function middleware(request: NextRequest) {
-  const currentPortal = request.cookies.get("portal")?.value || "user";
   const path = request.nextUrl.pathname;
   const sessionCookie = getSessionCookie(request);
 
@@ -60,28 +35,9 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Check if business path is being accessed from user portal
-  if (
-    currentPortal === "user" &&
-    BUSINESS_PATHS.some((p) => path.startsWith(p))
-  ) {
-    return NextResponse.redirect(new URL("/", request.url));
-  }
-
-  // Check if user path is being accessed from business portal
-  if (
-    currentPortal === "business" &&
-    USER_PATHS.some((p) => path.startsWith(p))
-  ) {
-    return NextResponse.redirect(new URL("/", request.url));
-  }
-
   return NextResponse.next();
 }
 
 export const config = {
-  // Simplified matcher that just excludes static assets
-  matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)).*)",
-  ],
+  matcher: "/((?!api|_next/static|_next/image|favicon.ico).*)",
 };
