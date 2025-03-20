@@ -1,9 +1,16 @@
-// Export the bare minimum middleware function
+import { NextResponse } from "next/server";
+
+// Minimal middleware implementation with a proper response
 export function middleware() {
-  // Intentionally blank - just pass through all requests
+  return NextResponse.next();
 }
 
-// Explicitly declare we don't need to match any routes
+// Export a specific matcher with source pattern
 export const config = {
-  matcher: [],
+  matcher: [
+    {
+      source: "/((?!api|_next/static|_next/image|favicon.ico).*)",
+      has: [],
+    },
+  ],
 };
