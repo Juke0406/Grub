@@ -35,9 +35,20 @@ export function PWAInstallPrompt() {
     // Don't show if already installed
     if (isStandalone()) return;
 
-    // Check if user has already seen the prompt
-    const hasSeenPrompt = Cookies.get("pwa-prompt-seen");
-    if (hasSeenPrompt) return;
+    // Only check cookie if not in standalone mode and browser supports installation
+    const { isMobile } = getPlatformInfo();
+    if (isMobile && window.matchMedia("(display-mode: browser)").matches) {
+      const hasSeenPrompt = Cookies.get("pwa-prompt-seen");
+      // If they've seen it recently, don't show again
+      if (hasSeenPrompt) {
+        const lastPrompt = parseInt(hasSeenPrompt);
+        const now = Date.now();
+        // Show prompt again after 7 days
+        if (now - lastPrompt < 7 * 24 * 60 * 60 * 1000) {
+          return;
+        }
+      }
+    }
 
     const handleBeforeInstallPrompt = (e: Event) => {
       // Prevent Chrome 67 and earlier from automatically showing the prompt
@@ -88,7 +99,8 @@ export function PWAInstallPrompt() {
     setShowPrompt(false);
 
     // Set cookie to not show again
-    Cookies.set("pwa-prompt-seen", "true", { expires: 365 });
+    // Store timestamp of when prompt was shown/dismissed
+    Cookies.set("pwa-prompt-seen", Date.now().toString(), { expires: 7 });
   };
 
   const handleDismiss = () => {
