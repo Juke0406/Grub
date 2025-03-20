@@ -9,7 +9,7 @@ import {
   Timer,
 } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
@@ -38,6 +38,29 @@ export function ReservationCard({
   const [success, setSuccess] = useState(false);
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
+  const [directionsOpen, setDirectionsOpen] = useState(false);
+
+  // Mock fixed location in Singapore
+  const STORE_COORDS = useMemo(
+    () => ({
+      lat: "1.2789",
+      lng: "103.8536",
+      address: "313@Somerset, 313 Orchard Road, Singapore 238895",
+    }),
+    []
+  );
+
+  const mapUrls = useMemo(
+    () => ({
+      google: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+        STORE_COORDS.address
+      )}`,
+      apple: `http://maps.apple.com/?q=${encodeURIComponent(
+        STORE_COORDS.address
+      )}`,
+    }),
+    [STORE_COORDS]
+  );
 
   const handleCancel = async () => {
     setIsLoading(true);
@@ -173,7 +196,12 @@ export function ReservationCard({
           </div>
 
           <div className="flex flex-wrap gap-2 mt-4 pt-4">
-            <Button className="flex-1 min-w-[180px]">Get Directions</Button>
+            <Button
+              className="flex-1 min-w-[180px]"
+              onClick={() => setDirectionsOpen(true)}
+            >
+              Get Directions
+            </Button>
             {reservation.status === "ready" && (
               <Button
                 variant="default"
@@ -321,6 +349,42 @@ export function ReservationCard({
               )}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Directions Modal */}
+      <Dialog open={directionsOpen} onOpenChange={setDirectionsOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Get Directions</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-4">
+            <p className="text-sm text-muted-foreground">
+              Choose your preferred maps application:
+            </p>
+            <div className="flex flex-col gap-2">
+              <Button
+                variant="outline"
+                className="w-full justify-start"
+                onClick={() => {
+                  window.open(mapUrls.google, "_blank");
+                  setDirectionsOpen(false);
+                }}
+              >
+                Open in Google Maps
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full justify-start"
+                onClick={() => {
+                  window.open(mapUrls.apple, "_blank");
+                  setDirectionsOpen(false);
+                }}
+              >
+                Open in Apple Maps
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </>
