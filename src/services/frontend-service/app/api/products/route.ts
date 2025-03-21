@@ -4,6 +4,7 @@ import { getDatabase } from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
+import { authMiddleware } from "../middleware/auth-middleware";
 
 export async function GET(request: NextRequest) {
   try {
@@ -150,24 +151,29 @@ export async function GET(request: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
-
-    if (!session || !session.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const authResult = await authMiddleware(req);
+    if (authResult instanceof NextResponse) {
+      return authResult;
     }
-
-    const userId = session.user.id;
-    const data = await req.json();
-
-    // Find user's store
+    const { store, type } = authResult;
     const db = await getDatabase();
-    const store = await db.collection("stores").findOne({ ownerId: userId });
 
-    if (!store) {
-      return NextResponse.json({ error: "Store not found" }, { status: 404 });
+    // If using API key, update its usage
+    if (type === "apiKey") {
+      const headersList = await headers();
+      const apiKey = headersList.get("x-api-key");
+      if (apiKey) {
+        await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/api-key`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ key: apiKey }),
+        });
+      }
     }
+
+    const data = await req.json();
 
     // Validate product data
     const {
@@ -239,15 +245,12 @@ export async function POST(req: NextRequest) {
 
 export async function PATCH(request: NextRequest) {
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
-
-    if (!session || !session.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const authResult = await authMiddleware(request);
+    if (authResult instanceof NextResponse) {
+      return authResult;
     }
 
-    const userId = session.user.id;
+    const { store } = authResult;
     const { productId, quantityReserved } = await request.json();
 
     if (!productId || !quantityReserved) {
@@ -258,13 +261,6 @@ export async function PATCH(request: NextRequest) {
     }
 
     const db = await getDatabase();
-
-    // Find user's store
-    const store = await db.collection("stores").findOne({ ownerId: userId });
-
-    if (!store) {
-      return NextResponse.json({ error: "Store not found" }, { status: 404 });
-    }
 
     const productsCollection = db.collection("products");
 

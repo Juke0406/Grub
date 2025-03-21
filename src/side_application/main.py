@@ -2,6 +2,12 @@ import tkinter as tk
 from tkinter import ttk
 from datetime import datetime, timedelta
 import requests
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+APP_URL = os.getenv('APP_URL', 'http://localhost:3000')
 
 def setup_action():
     print("Setup button clicked")
@@ -15,167 +21,117 @@ def setup_action():
     # close the window
     root.destroy()
 
+def generate_sku():
+    """Generate a random SKU following the same format as the API"""
+    import random
+    return f"SKU{str(random.randint(0, 999999)).zfill(6)}"
+
 def demo_action():
     print("Demo button clicked")
     # Sample list of products expiring within 1 week
     products = [
         {
-            "SKU": "001",
-            "imageUrl": "https://media.nedigital.sg/fairprice/fpol/media/images/product/XL/13062328_XL1_20230707.jpg?w=400&q=70",
-            "name": "GreenField Whole Milk",
-            "originalPrice": 8.99,
-            "discountedPrice": 7.99,
-            "quantity": 10,
-            "description": "1 gallon of whole milk",
-            "category": "Dairy",
-            "userID": "user-test",
-            "expirationDate": (datetime.now() + timedelta(days=5)).strftime('%Y-%m-%d')
-        },
-        {
-            "SKU": "002",
-            "imageUrl": "https://images.cdn.saveonfoods.com/zoom/00068721722540.jpg",
-            "name": "Whole Wheat Bread",
-            "originalPrice": 2.99,
-            "discountedPrice": 2.49,
-            "quantity": 15,
-            "description": "Loaf of whole wheat bread",
-            "category": "Bakery",
-            "userID": "user-test",
-            "expirationDate": (datetime.now() + timedelta(days=3)).strftime('%Y-%m-%d')
-        },
-        {
-            "SKU": "003",
-            "imageUrl": "https://www.packagingstrategies.com/ext/resources/2017-Postings/New-Packages/Eggs-1-for-web.png",
-            "name": "Organic Eggs",
-            "originalPrice": 3.49,
-            "discountedPrice": 2.99,
-            "quantity": 8,
-            "description": "Dozen organic eggs",
-            "category": "Dairy",
-            "userID": "user-test",
-            "expirationDate": (datetime.now() + timedelta(days=6)).strftime('%Y-%m-%d')
-        },
-        {
-            "SKU": "004",
-            "imageUrl": "https://digitalcontent.api.tesco.com/v2/media/ghs/96df02e6-a3cf-45a2-b059-c9fcff8adf0e/938c1d1a-9a21-406d-8486-4c80867da498.jpeg?h=960&w=960",
-            "name": "Little Gem Lettuce",
-            "originalPrice": 1.29,
-            "discountedPrice": 0.99,
-            "quantity": 20,
-            "description": "Fresh lettuce",
-            "category": "Produce",
-            "userID": "user-test",
-            "expirationDate": (datetime.now() + timedelta(days=2)).strftime('%Y-%m-%d')
-        },
-        {
-            "SKU": "005",
-            "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdm9HJa4wsKjXuI14LuFm-jCeXsfklqp5Y_Q&s",
-            "name": "Chicken Breast",
+            "SKU": generate_sku(),
+            "name": "Fresh Organic Apples",
+            "description": "Sweet and crisp organic apples from local farms",
             "originalPrice": 5.99,
-            "discountedPrice": 4.99,
-            "quantity": 12,
-            "description": "Boneless skinless chicken breast",
-            "category": "Meat",
-            "userID": "user-test",
-            "expirationDate": (datetime.now() + timedelta(days=4)).strftime('%Y-%m-%d')
+            "discountedPrice": 4.49,
+            "category": "produce",
+            "imageUrl": "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6",
+            "inventory": {
+                "quantity": 30,
+                "expirationDate": (datetime.now() + timedelta(days=7)).isoformat()
+            }
         },
         {
-            "SKU": "006",
-            "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTQ6Fk1w0Gv-NZmfDmr3GrdZFysq832JJnTdA&s",
-            "name": "Pasta",
-            "originalPrice": 1.99,
-            "discountedPrice": 1.49,
-            "quantity": 30,
-            "description": "1 lb of pasta",
-            "category": "Cooking",
-            "userID": "user-test",
-            "expirationDate": (datetime.now() + timedelta(days=2)).strftime('%Y-%m-%d')
+            "SKU": generate_sku(),
+            "name": "Whole Grain Bread",
+            "description": "Freshly baked whole grain bread",
+            "originalPrice": 4.99,
+            "discountedPrice": 3.99,
+            "category": "bread",
+            "imageUrl": "https://images.unsplash.com/photo-1549931319-a545dcf3bc73",
+            "inventory": {
+                "quantity": 20,
+                "expirationDate": (datetime.now() + timedelta(days=3)).isoformat()
+            }
         },
         {
-            "SKU": "007",
-            "imageUrl": "https://m.media-amazon.com/images/I/81SwbUNiUQL._AC_UF1000,1000_QL80_.jpg",
-            "name": "Tomato Sauce",
-            "originalPrice": 2.49,
-            "discountedPrice": 1.99,
-            "quantity": 10,
-            "description": "Jar of tomato sauce",
-            "category": "Cooking",
-            "userID": "user-test",
-            "expirationDate": (datetime.now() + timedelta(days=6)).strftime('%Y-%m-%d')
-        },
-        {
-            "SKU": "008",
-            "imageUrl": "https://m.media-amazon.com/images/I/81Ml0P+qqnL.jpg",
-            "name": "Toilet Paper",
+            "SKU": generate_sku(),
+            "name": "Free-Range Eggs",
+            "description": "Farm fresh free-range eggs",
             "originalPrice": 6.99,
             "discountedPrice": 5.99,
-            "quantity": 25,
-            "description": "12-pack of toilet paper",
-            "category": "Household",
-            "userID": "user-test",
-            "expirationDate": (datetime.now() + timedelta(days=7)).strftime('%Y-%m-%d')
+            "category": "dairy",
+            "imageUrl": "https://images.unsplash.com/photo-1506976785307-8732e854ad03",
+            "inventory": {
+                "quantity": 40,
+                "expirationDate": (datetime.now() + timedelta(days=14)).isoformat()
+            }
         },
         {
-            "SKU": "009",
-            "imageUrl": "https://m.media-amazon.com/images/I/81BleDYuugL.jpg",
-            "name": "Hand Soap",
-            "originalPrice": 3.49,
-            "discountedPrice": 2.99,
-            "quantity": 15,
-            "description": "8 oz bottle of hand soap",
-            "category": "Household",
-            "userID": "user-test",
-            "expirationDate": (datetime.now() + timedelta(days=5)).strftime('%Y-%m-%d')
+            "SKU": generate_sku(),
+            "name": "Chicken Breast",
+            "description": "Premium boneless skinless chicken breast",
+            "originalPrice": 12.99,
+            "discountedPrice": 9.99,
+            "category": "meat",
+            "imageUrl": "https://images.unsplash.com/photo-1604503468506-a8da13d82791",
+            "inventory": {
+                "quantity": 25,
+                "expirationDate": (datetime.now() + timedelta(days=5)).isoformat()
+            }
         },
         {
-            "SKU": "010",
-            "imageUrl": "https://www.slhfreshfruits.sg/cdn/shop/products/76.png?v=1661949183",
-            "name": "Apples (each)",
-            "originalPrice": 2.49,
-            "discountedPrice": 1.99,
-            "quantity": 200,
-            "description": "Freshest apples from the orchard",
-            "category": "Produce",
-            "userID": "user-test",
-            "expirationDate": (datetime.now() + timedelta(days=5)).strftime('%Y-%m-%d')
+            "SKU": generate_sku(),
+            "name": "Fresh Basil",
+            "description": "Organic fresh basil bunch",
+            "originalPrice": 2.99,
+            "discountedPrice": 2.49,
+            "category": "produce",
+            "imageUrl": "https://images.unsplash.com/photo-1538596313828-41d729090199",
+            "inventory": {
+                "quantity": 30,
+                "expirationDate": (datetime.now() + timedelta(days=5)).isoformat()
+            }
         }
     ]
 
     # Display the products in the console
     for product in products:
-        print(f"SKU: {product['SKU']}")
-        print(f"Image URL: {product['imageUrl']}")
-        print(f"Name: {product['name']}")
-        print(f"Price: ${product['originalPrice']}")
-        print(f"Discounted Price: ${product['discountedPrice']}")
-        print(f"Quantity: {product['quantity']}")
-        print(f"Description: {product['description']}")
-        print(f"Category: {product['category']}")
-        print(f"Expiry Date: {product['expirationDate']}")
+        print("Product details:")
+        print(f"  SKU: {product['SKU']}")
+        print(f"  Name: {product['name']}")
+        print(f"  Description: {product['description']}")
+        print(f"  Original Price: ${product['originalPrice']}")
+        print(f"  Discounted Price: ${product['discountedPrice']}")
+        print(f"  Category: {product['category']}")
+        print(f"  Image URL: {product['imageUrl']}")
+        print(f"  Inventory:")
+        print(f"    Quantity: {product['inventory']['quantity']}")
+        print(f"    Expiry Date: {product['inventory']['expirationDate']}")
         print("-" * 40)
 
-    # Send a POST request to the API
-    url = "https://grub-app.vercel.app/api/products"
-    # alternative use the following url if you are running your own local server
-    # url = "http://localhost:3000/api/products"
-    headers = {"Content-Type": "application/json"}
-    response = requests.post(url, json=products, headers=headers)
-    print("Response:", response.json())
-
+    # Get API key from input
     api_key = api_key_var.get()
     if not api_key:
-        print("API Key is required for update")
+        print("API Key is required")
         return
+
+    # Send a POST request to the API with API key
+    headers = {
+        "Content-Type": "application/json",
+        "x-api-key": api_key
+    }
     
-    # send a patch request to the API
-    print(api_key)
+    products_url = f"{APP_URL}/api/products"
+
+    # Send each product individually
     for product in products:
-        url = "https://grub-app.vercel.app/api/api-key"
-        # alternative use the following url if you are running your own local server
-        # url = "http://localhost:3000/api/api-key"
-        headers = {"Content-Type": "application/json"}
-        response = requests.patch(url, json={"key": api_key}, headers=headers)
-        print("Response:", response)
+        response = requests.post(products_url, json=product, headers=headers)
+        print(f"Adding {product['name']}...")
+        print(f"Response: {response.json()}")
+        print("-" * 40)
 
 # Initialize main window
 root = tk.Tk()

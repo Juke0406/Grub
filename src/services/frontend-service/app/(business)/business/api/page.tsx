@@ -52,11 +52,11 @@ const usageData = {
 
 const sampleCode = {
   curl: `# Get inventory for your food stall
-curl -X GET ${process.env.NEXT_PUBLIC_API_URL}/v1/inventory \\
+curl -X GET ${process.env.NEXT_PUBLIC_APP_URL}/v1/inventory \\
   - "Authorization: Bearer YOUR_API_KEY"
 
 # Add a new food item to your inventory
-curl -X POST ${process.env.NEXT_PUBLIC_API_URL}/v1/inventory \\
+curl -X POST ${process.env.NEXT_PUBLIC_APP_URL}/v1/inventory \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -66,7 +66,7 @@ curl -X POST ${process.env.NEXT_PUBLIC_API_URL}/v1/inventory \\
   }'
 
 # Remove a food item
-curl -X DELETE ${process.env.NEXT_PUBLIC_API_URL}/v1/inventory \\
+curl -X DELETE ${process.env.NEXT_PUBLIC_APP_URL}/v1/inventory \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -81,11 +81,11 @@ headers = {
 }
 
 # Get inventory
-get_response = requests.get('${process.env.NEXT_PUBLIC_API_URL}/v1/inventory', headers=headers)
+get_response = requests.get('${process.env.NEXT_PUBLIC_APP_URL}/v1/inventory', headers=headers)
 print("Inventory:", get_response.json())
 
 # Add new item
-add_response = requests.post('${process.env.NEXT_PUBLIC_API_URL}/v1/inventory', headers=headers, json={
+add_response = requests.post('${process.env.NEXT_PUBLIC_APP_URL}/v1/inventory', headers=headers, json={
     'item_name': 'Fried Rice',
     'quantity': 50,
     'price': 5.99
@@ -93,7 +93,7 @@ add_response = requests.post('${process.env.NEXT_PUBLIC_API_URL}/v1/inventory', 
 print("Add Item Response:", add_response.json())
 
 # Remove item
-delete_response = requests.delete('${process.env.NEXT_PUBLIC_API_URL}/v1/inventory', headers=headers, json={
+delete_response = requests.delete('${process.env.NEXT_PUBLIC_APP_URL}/v1/inventory', headers=headers, json={
     'item_id': 'ITEM_ID'
 })
 print("Delete Item Response:", delete_response.json())`,
@@ -107,13 +107,13 @@ const headers = {
 
 // Get inventory
 const getInventory = async () => {
-  const res = await axios.get('${process.env.NEXT_PUBLIC_API_URL}/v1/inventory', { headers });
+  const res = await axios.get('${process.env.NEXT_PUBLIC_APP_URL}/v1/inventory', { headers });
   console.log("Inventory:", res.data);
 };
 
 // Add item
 const addItem = async () => {
-  const res = await axios.post('${process.env.NEXT_PUBLIC_API_URL}/v1/inventory', {
+  const res = await axios.post('${process.env.NEXT_PUBLIC_APP_URL}/v1/inventory', {
     item_name: 'Fried Rice',
     quantity: 50,
     price: 5.99
@@ -123,7 +123,7 @@ const addItem = async () => {
 
 // Delete item
 const deleteItem = async () => {
-  const res = await axios.delete('${process.env.NEXT_PUBLIC_API_URL}/v1/inventory', {
+  const res = await axios.delete('${process.env.NEXT_PUBLIC_APP_URL}/v1/inventory', {
     headers,
     data: { item_id: 'ITEM_ID' }
   });

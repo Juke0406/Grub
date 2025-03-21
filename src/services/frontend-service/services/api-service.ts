@@ -6,7 +6,7 @@ export interface APIKey {
   created_at: string;
   last_used: string | null;
   usageCount?: number;
-  expires_at?: string; 
+  expires_at?: string;
   monthly_cost?: string;
 }
 
@@ -20,23 +20,25 @@ export interface CreateApiKeyResponse {
 }
 
 export interface DeleteApiKeyResponse {
-    message: string;
+  message: string;
 }
 
 // const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_URL}/api_keys` || 'http://localhost:8080/api';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL
-  ? `${process.env.NEXT_PUBLIC_API_URL}/api`
+const API_BASE_URL = process.env.NEXT_PUBLIC_APP_URL
+  ? `${process.env.NEXT_PUBLIC_APP_URL}/api`
   : "/api";
 
 // Function to create a new API key for a specific user
-export const createApiKey = async (userId: string): Promise<CreateApiKeyResponse> => {
+export const createApiKey = async (
+  userId: string
+): Promise<CreateApiKeyResponse> => {
   const response = await fetch(`${API_BASE_URL}/api-key`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       userId: userId, // use camelCase
-      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // optional, or let backend default to 30 days
+      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // optional, or let backend default to 30 days
     }),
   });
 
@@ -48,12 +50,11 @@ export const createApiKey = async (userId: string): Promise<CreateApiKeyResponse
   return data;
 };
 
-
 // Function to delete an existing API key by its ID
 export const deleteApiKey = async (key: string) => {
   const response = await fetch(`${API_BASE_URL}/api-key`, {
-    method: 'DELETE',
-    headers: { 'Content-Type': 'application/json' },
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ key }), // pass { key: "actual-api-key-string" }
   });
 
@@ -61,7 +62,6 @@ export const deleteApiKey = async (key: string) => {
     throw new Error(`Failed to delete API key: ${response.statusText}`);
   }
 };
-
 
 // // Function to retrieve all API keys for a specific user
 // export const getApiKeys = async (userId: string): Promise<APIKey[]> => {
@@ -81,10 +81,12 @@ export async function getApiKeys(userId: string) {
     throw new Error("User ID is undefined or empty");
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || ""; // fallback to empty if running on client side
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || ""; // fallback to empty if running on client side
 
   // Use relative path if local
-  const url = baseUrl ? `${baseUrl}/api/api-key?userId=${userId}` : `/api/api-key?userId=${userId}`;
+  const url = baseUrl
+    ? `${baseUrl}/api/api-key?userId=${userId}`
+    : `/api/api-key?userId=${userId}`;
 
   const response = await fetch(url);
 
@@ -95,6 +97,3 @@ export async function getApiKeys(userId: string) {
   const data: APIKey[] = await response.json();
   return data;
 }
-
-
-
