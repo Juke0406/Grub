@@ -101,6 +101,7 @@ export default function ProductsPage() {
   const [searchValue, setSearchValue] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
   const observer = useRef<IntersectionObserver | null>(null);
+  const [activeTab, setActiveTab] = useState("list");
 
   const fetchStoreId = useCallback(async () => {
     if (!session?.user?.id) {
@@ -361,7 +362,11 @@ export default function ProductsPage() {
 
   return (
     <div className="container p-6">
-      <Tabs defaultValue="list" className="space-y-4">
+      <Tabs
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className="space-y-4"
+      >
         <TabsList>
           <TabsTrigger value="list">Products List</TabsTrigger>
           <TabsTrigger value="create">Create Product</TabsTrigger>
@@ -389,14 +394,7 @@ export default function ProductsPage() {
                   </p>
                 </div>
                 <div className="flex gap-4">
-                  <Button
-                    onClick={() => {
-                      const createTab = document.querySelector(
-                        '[value="create"]'
-                      ) as HTMLButtonElement;
-                      createTab?.click();
-                    }}
-                  >
+                  <Button onClick={() => setActiveTab("create")}>
                     Create Product
                   </Button>
                   <Button
@@ -454,10 +452,7 @@ export default function ProductsPage() {
                             size="sm"
                             onClick={() => {
                               handleEdit(product);
-                              const tabButton = document.querySelector(
-                                '[value="create"]'
-                              ) as HTMLButtonElement;
-                              tabButton?.click();
+                              setActiveTab("create");
                             }}
                           >
                             Edit
@@ -785,10 +780,7 @@ export default function ProductsPage() {
                           `Successfully seeded ${data.count} products`
                         );
                         fetchProducts(1, true);
-                        const listTab = document.querySelector(
-                          '[value="list"]'
-                        ) as HTMLButtonElement;
-                        listTab?.click();
+                        setActiveTab("list");
                       } catch (error) {
                         console.error(error);
                         toast.error(
