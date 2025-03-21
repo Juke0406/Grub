@@ -74,15 +74,9 @@ export function MobileNav() {
       ],
     },
     {
-      href: "/settings",
+      href: "/settings/profile",
       icon: Settings2,
       label: "Settings",
-      items: [
-        {
-          title: "Profile",
-          url: "/settings/profile",
-        },
-      ],
     },
   ];
 
@@ -106,15 +100,9 @@ export function MobileNav() {
       href: "/business/analytics",
       icon: BarChart3,
       label: "Analytics",
-      items: [
-        {
-          title: "Reports",
-          url: "/business/analytics",
-        },
-      ],
     },
     {
-      href: "/settings",
+      href: "/business/settings/store",
       icon: Settings2,
       label: "Settings",
       items: [
@@ -137,7 +125,10 @@ export function MobileNav() {
           {(currentPortal === "business" ? businessNavItems : userNavItems).map(
             (item) => {
               const isActive =
-                pathname === item.href || pathname.startsWith(item.href + "/");
+                pathname === item.href ||
+                (item.items?.some((subItem) => pathname === subItem.url) ??
+                  (item.href !== "/business" &&
+                    pathname.startsWith(item.href + "/")));
               return item.items ? (
                 <DropdownMenu key={item.href}>
                   <DropdownMenuTrigger
